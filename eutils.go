@@ -20,6 +20,8 @@ type M map[string]any
 
 type Mapping struct {
 	defaultKeyword bool
+	textAsKeyword  bool
+	longAsKeyword  bool
 	visited        map[uintptr]bool
 	deep           int
 	withTag        bool
@@ -39,12 +41,22 @@ func (m *Mapping) IgnoreNil(b bool) {
 	m.ignoreNil = b
 }
 
+func (m *Mapping) TextAsKeyword(b bool) {
+	m.textAsKeyword = b
+}
+
+func (m *Mapping) LongAsKeyword(b bool) {
+	m.longAsKeyword = b
+}
+
 func NewMapping() *Mapping {
 	return &Mapping{
 		visited:        make(map[uintptr]bool),
 		defaultKeyword: true,
 		withTag:        false,
 		ignoreNil:      true,
+		textAsKeyword:  false,
+		longAsKeyword:  false,
 		deep:           0,
 	}
 }
@@ -65,6 +77,10 @@ func (m *Mapping) GenerateMapping(t any) M {
 	}
 
 	if rv.Kind() == reflect.Ptr {
+		rv = rv.Elem()
+	}
+
+	if rv.Kind() == reflect.Interface {
 		rv = rv.Elem()
 	}
 
@@ -159,33 +175,51 @@ func (m *Mapping) printMap(mapping map[string]any, key string, v reflect.Value, 
 			parse = &parser{}
 		}
 
+		if parse.Ignore {
+			continue
+		}
+
 		if name == "" {
 			name = fieldName
 		}
 
+		var defaultType = m.defaultType(value)
+
+		var tp = parse.Type
+
 		if parse.Type == "" {
-			parse.Type = m.defaultType(value)
+			tp = defaultType
 		}
 
 		var t = M{
-			"type": parse.Type,
+			"type": tp,
 		}
 
 		if parse.Type == "keyword" {
 			t["ignore_above"] = 256
 		}
 
-		if parse.Analyzer != "" && parse.Type == "text" {
+		if parse.Analyzer != "" && tp == "text" {
 			t["analyzer"] = parse.Analyzer
 		}
 
-		if parse.Keyword && parse.Type == "text" {
+		if parse.Keyword && tp == "text" && !m.textAsKeyword {
 			t["fields"] = M{
 				"keyword": M{
 					"type":         "keyword",
 					"ignore_above": 256,
 				},
 			}
+		}
+
+		if m.textAsKeyword && tp == "text" && (parse.Type == "" && parse.Analyzer == "") {
+			t["type"] = "keyword"
+			t["ignore_above"] = 256
+		}
+
+		if m.longAsKeyword && tp == "long" && (parse.Type == "" && parse.Analyzer == "") {
+			t["type"] = "keyword"
+			t["ignore_above"] = 256
 		}
 
 		if parse.Index != nil {
@@ -241,27 +275,35 @@ func (m *Mapping) printStruct(mapping map[string]any, key string, v reflect.Valu
 				parse = &parser{}
 			}
 
+			if parse.Ignore {
+				continue
+			}
+
 			if name == "" {
 				name = fieldName
 			}
 
+			var defaultType = m.defaultType(value)
+
+			var tp = parse.Type
+
 			if parse.Type == "" {
-				parse.Type = m.defaultType(value)
+				tp = defaultType
 			}
 
 			var t = M{
-				"type": parse.Type,
+				"type": tp,
 			}
 
 			if parse.Type == "keyword" {
 				t["ignore_above"] = 256
 			}
 
-			if parse.Analyzer != "" && parse.Type == "text" {
+			if parse.Analyzer != "" && tp == "text" {
 				t["analyzer"] = parse.Analyzer
 			}
 
-			if parse.Keyword && parse.Type == "text" {
+			if parse.Keyword && tp == "text" && !m.textAsKeyword {
 				t["fields"] = M{
 					"keyword": M{
 						"type":         "keyword",
@@ -270,16 +312,18 @@ func (m *Mapping) printStruct(mapping map[string]any, key string, v reflect.Valu
 				}
 			}
 
-			if parse.Index != nil {
-				t["index"] = *parse.Index
+			if m.textAsKeyword && tp == "text" && (parse.Type == "" && parse.Analyzer == "") {
+				t["type"] = "keyword"
+				t["ignore_above"] = 256
 			}
 
-			// first struct
-			if key == "" {
-				delete(mapping, key)
-				mapping[name] = t
-				m.format(mapping, name, value, field.Tag)
-				continue
+			if m.longAsKeyword && tp == "long" && (parse.Type == "" && parse.Analyzer == "") {
+				t["type"] = "keyword"
+				t["ignore_above"] = 256
+			}
+
+			if parse.Index != nil {
+				t["index"] = *parse.Index
 			}
 
 			// which type of value can be nil
@@ -296,6 +340,14 @@ func (m *Mapping) printStruct(mapping map[string]any, key string, v reflect.Valu
 						}
 					}
 				}
+			}
+
+			// first struct
+			if key == "" {
+				delete(mapping, key)
+				mapping[name] = t
+				m.format(mapping, name, value, field.Tag)
+				continue
 			}
 
 			newMapping[name] = t
@@ -366,6 +418,7 @@ type parser struct {
 	Analyzer string
 	Type     string
 	Index    *bool
+	Ignore   bool
 }
 
 func (m *Mapping) parseElasticTag(tag reflect.StructTag) (string, *parser) {
@@ -376,9 +429,14 @@ func (m *Mapping) parseElasticTag(tag reflect.StructTag) (string, *parser) {
 	var tp string
 	var keyword bool
 	var analyzer string
+	var ignore bool
 	var index *bool
 	var arr = strings.Split(str, ",")
 	if (str == "" || len(arr) == 0) && m.withTag {
+		return name, nil
+	}
+
+	if str == "-" {
 		return name, nil
 	}
 
@@ -400,6 +458,9 @@ func (m *Mapping) parseElasticTag(tag reflect.StructTag) (string, *parser) {
 			var b = strings.TrimPrefix(arr[i], "index:") == "true"
 			index = &b
 		}
+		if strings.HasPrefix(arr[i], "ignore:") {
+			ignore = strings.TrimPrefix(arr[i], "ignore:") == "true"
+		}
 	}
 
 	if !strings.Contains(str, "keyword") && m.defaultKeyword {
@@ -411,6 +472,7 @@ func (m *Mapping) parseElasticTag(tag reflect.StructTag) (string, *parser) {
 		Analyzer: analyzer,
 		Type:     tp,
 		Index:    index,
+		Ignore:   ignore,
 	}
 }
 
