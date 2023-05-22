@@ -350,7 +350,12 @@ func (m *Mapping) printStruct(mapping map[string]any, key string, v reflect.Valu
 						if m.ignoreNil {
 							continue
 						} else {
-							value = reflect.New(value.Type().Elem())
+							if value.Type().Kind() == reflect.Interface {
+								// you can not know the type of interface if it is nil
+								continue
+							} else {
+								value = reflect.New(value.Type().Elem())
+							}
 						}
 					}
 				}
