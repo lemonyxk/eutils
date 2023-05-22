@@ -22,6 +22,7 @@ type Mapping struct {
 	defaultKeyword bool
 	textAsKeyword  bool
 	longAsKeyword  bool
+	ignoreAbove    int
 	visited        map[uintptr]bool
 	deep           int
 	withTag        bool
@@ -49,6 +50,18 @@ func (m *Mapping) LongAsKeyword(b bool) {
 	m.longAsKeyword = b
 }
 
+func (m *Mapping) IgnoreAbove(i int) {
+	if i < 0 {
+		panic("ignore above must greater than 0")
+	}
+
+	if i > 32766 {
+		panic("ignore above must less than 32766")
+	}
+
+	m.ignoreAbove = i
+}
+
 func NewMapping() *Mapping {
 	return &Mapping{
 		visited:        make(map[uintptr]bool),
@@ -57,6 +70,7 @@ func NewMapping() *Mapping {
 		ignoreNil:      true,
 		textAsKeyword:  false,
 		longAsKeyword:  false,
+		ignoreAbove:    256,
 		deep:           0,
 	}
 }
@@ -85,7 +99,7 @@ func (m *Mapping) GenerateMapping(t any) M {
 	}
 
 	if rv.Kind() != reflect.Struct {
-		return nil
+		panic("t must be struct")
 	}
 
 	m.printStruct(properties, "", rv)
@@ -196,7 +210,7 @@ func (m *Mapping) printMap(mapping map[string]any, key string, v reflect.Value, 
 		}
 
 		if parse.Type == "keyword" {
-			t["ignore_above"] = 256
+			t["ignore_above"] = m.ignoreAbove
 		}
 
 		if parse.Analyzer != "" && tp == "text" {
@@ -207,19 +221,19 @@ func (m *Mapping) printMap(mapping map[string]any, key string, v reflect.Value, 
 			t["fields"] = M{
 				"keyword": M{
 					"type":         "keyword",
-					"ignore_above": 256,
+					"ignore_above": m.ignoreAbove,
 				},
 			}
 		}
 
 		if m.textAsKeyword && tp == "text" && (parse.Type == "" && parse.Analyzer == "") {
 			t["type"] = "keyword"
-			t["ignore_above"] = 256
+			t["ignore_above"] = m.ignoreAbove
 		}
 
 		if m.longAsKeyword && tp == "long" && (parse.Type == "" && parse.Analyzer == "") {
 			t["type"] = "keyword"
-			t["ignore_above"] = 256
+			t["ignore_above"] = m.ignoreAbove
 		}
 
 		if parse.Index != nil {
@@ -296,7 +310,7 @@ func (m *Mapping) printStruct(mapping map[string]any, key string, v reflect.Valu
 			}
 
 			if parse.Type == "keyword" {
-				t["ignore_above"] = 256
+				t["ignore_above"] = m.ignoreAbove
 			}
 
 			if parse.Analyzer != "" && tp == "text" {
@@ -307,19 +321,19 @@ func (m *Mapping) printStruct(mapping map[string]any, key string, v reflect.Valu
 				t["fields"] = M{
 					"keyword": M{
 						"type":         "keyword",
-						"ignore_above": 256,
+						"ignore_above": m.ignoreAbove,
 					},
 				}
 			}
 
 			if m.textAsKeyword && tp == "text" && (parse.Type == "" && parse.Analyzer == "") {
 				t["type"] = "keyword"
-				t["ignore_above"] = 256
+				t["ignore_above"] = m.ignoreAbove
 			}
 
 			if m.longAsKeyword && tp == "long" && (parse.Type == "" && parse.Analyzer == "") {
 				t["type"] = "keyword"
-				t["ignore_above"] = 256
+				t["ignore_above"] = m.ignoreAbove
 			}
 
 			if parse.Index != nil {
@@ -422,7 +436,6 @@ type parser struct {
 }
 
 func (m *Mapping) parseElasticTag(tag reflect.StructTag) (string, *parser) {
-
 	var str = tag.Get("es")
 	var js = tag.Get("json")
 	var name = strings.Split(js, ",")[0]
