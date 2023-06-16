@@ -84,11 +84,11 @@ func (m *Mapping) GenerateMapping(t any) M {
 
 	var properties = M{}
 
-	var mapping = M{
-		"mappings": M{
-			"properties": properties,
-		},
-	}
+	// var mapping = M{
+	// 	"mappings": M{
+	// 		"properties": properties,
+	// 	},
+	// }
 
 	if rv.Kind() == reflect.Ptr {
 		rv = rv.Elem()
@@ -104,7 +104,9 @@ func (m *Mapping) GenerateMapping(t any) M {
 
 	m.printStruct(properties, "", rv)
 
-	return mapping
+	return M{
+		"properties": properties,
+	}
 }
 
 func (m *Mapping) format(mapping map[string]any, key string, rv reflect.Value, tag reflect.StructTag) {
