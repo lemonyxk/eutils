@@ -131,6 +131,7 @@ func (m *Mapping) format(mapping map[string]any, key string, rv reflect.Value, t
 		// ignore
 	case reflect.Invalid:
 		// ignore
+		delete(mapping, key)
 
 	// COMPLEX TYPE
 	case reflect.Map:
@@ -277,112 +278,151 @@ func (m *Mapping) printStruct(mapping map[string]any, key string, v reflect.Valu
 
 			// elasticsearch ignore anonymous field
 			if field.Anonymous {
-				m.format(mapping, key, value, field.Tag)
-				continue
-			}
 
-			var name, parse = m.parseElasticTag(field.Tag)
-
-			if parse == nil && m.withTag {
-				continue
-			}
-
-			if parse == nil {
-				parse = &parser{}
-			}
-
-			if parse.Ignore {
-				continue
-			}
-
-			if name == "" {
-				name = fieldName
-			}
-
-			var defaultType = m.defaultType(value)
-
-			var tp = parse.Type
-
-			if parse.Type == "" {
-				tp = defaultType
-			}
-
-			var t = M{
-				"type": tp,
-			}
-
-			if parse.Type == "keyword" {
-				t["ignore_above"] = m.ignoreAbove
-			}
-
-			if parse.Analyzer != "" && tp == "text" {
-				t["analyzer"] = parse.Analyzer
-			}
-
-			if parse.Keyword && tp == "text" && !m.textAsKeyword {
-				t["fields"] = M{
-					"keyword": M{
-						"type":         "keyword",
-						"ignore_above": m.ignoreAbove,
-					},
-				}
-			}
-
-			if m.textAsKeyword && tp == "text" && (parse.Type == "" && parse.Analyzer == "") {
-				t["type"] = "keyword"
-				t["ignore_above"] = m.ignoreAbove
-			}
-
-			if m.longAsKeyword && tp == "long" && (parse.Type == "" && parse.Analyzer == "") {
-				t["type"] = "keyword"
-				t["ignore_above"] = m.ignoreAbove
-			}
-
-			if parse.Index != nil {
-				t["index"] = *parse.Index
-			}
-
-			// which type of value can be nil
-			switch value.Type().Kind() {
-			case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface:
-				if value.Type().Kind() == reflect.Ptr && !value.CanInterface() {
-					continue
-				} else {
-					if value.IsNil() {
-						if m.ignoreNil {
-							continue
-						} else {
-							if value.Type().Kind() == reflect.Interface {
-								// you can not know the type of interface if it is nil
-								continue
-							} else {
-								value = reflect.New(value.Type().Elem())
-							}
-						}
+				if value.Kind() == reflect.Ptr {
+					if m.ignoreNil {
+						return
+					} else {
+						value = reflect.New(value.Type().Elem())
+						value = value.Elem()
 					}
 				}
-			}
 
-			// first struct
-			if key == "" {
-				delete(mapping, key)
-				mapping[name] = t
-				m.format(mapping, name, value, field.Tag)
+				for j := 0; j < value.NumField(); j++ {
+					m.doField(value.Type().Field(j), value.Field(j), fieldName, key, mapping, newMapping)
+				}
 				continue
 			}
 
-			newMapping[name] = t
-
-			// printTags(newMapping, name, value)
-			m.format(newMapping, name, value, field.Tag)
+			m.doField(field, value, fieldName, key, mapping, newMapping)
 		}
 	}
 
 	m.deep = d
 }
 
-func (m *Mapping) printSlice(mapping map[string]any, key string, v reflect.Value, tag reflect.StructTag) {
+func (m *Mapping) doField(field reflect.StructField, value reflect.Value,
+	fieldName string, key string, mapping map[string]any, newMapping M) {
+	var name, parse = m.parseElasticTag(field.Tag)
 
+	if parse == nil && m.withTag {
+		return
+	}
+
+	if parse == nil {
+		parse = &parser{}
+	}
+
+	if parse.Ignore {
+		return
+	}
+
+	if name == "" {
+		name = fieldName
+	}
+
+	var defaultType = m.defaultType(value)
+
+	var tp = parse.Type
+
+	if parse.Type == "" {
+		tp = defaultType
+	}
+
+	var t = M{
+		"type": tp,
+	}
+
+	if parse.Type == "keyword" {
+		t["ignore_above"] = m.ignoreAbove
+	}
+
+	if parse.Analyzer != "" && tp == "text" {
+		t["analyzer"] = parse.Analyzer
+	}
+
+	if parse.Keyword && tp == "text" && !m.textAsKeyword {
+		t["fields"] = M{
+			"keyword": M{
+				"type":         "keyword",
+				"ignore_above": m.ignoreAbove,
+			},
+		}
+	}
+
+	if m.textAsKeyword && tp == "text" && (parse.Type == "" && parse.Analyzer == "") {
+		t["type"] = "keyword"
+		t["ignore_above"] = m.ignoreAbove
+	}
+
+	if m.longAsKeyword && tp == "long" && (parse.Type == "" && parse.Analyzer == "") {
+		t["type"] = "keyword"
+		t["ignore_above"] = m.ignoreAbove
+	}
+
+	if parse.Index != nil {
+		t["index"] = *parse.Index
+	}
+
+	// which type of value can be nil
+	switch field.Type.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface:
+		if field.Type.Kind() == reflect.Ptr {
+			if !value.CanInterface() {
+				return
+			}
+			if value.IsNil() {
+				if m.ignoreNil {
+					return
+				} else {
+					value = reflect.New(value.Type().Elem())
+				}
+			}
+		} else {
+			if value.IsNil() {
+				if m.ignoreNil {
+					return
+				} else {
+					if field.Type.Kind() == reflect.Interface {
+						// you can not know the type of interface if it is nil
+						return
+					} else {
+
+						if field.Type.Kind() == reflect.Slice {
+							//value = reflect.New(value.Type().Elem())
+							value = reflect.MakeSlice(value.Type(), 1, 1)
+							//value.Index(0).Set(reflect.Zero(value.Type().Elem()))
+						}
+
+						if field.Type.Kind() == reflect.Map {
+							// you can not know the type of key and value if it is nil
+							// cuz you don't know the name of key
+							delete(mapping, key)
+							return
+							//value = reflect.MakeMap(value.Type())
+							//value.SetMapIndex(reflect.Zero(field.Type.Key()), reflect.Zero(value.Type().Elem()))
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// first struct
+	if key == "" {
+		delete(mapping, key)
+		mapping[name] = t
+		m.format(mapping, name, value, field.Tag)
+		return
+	}
+
+	newMapping[name] = t
+
+	// printTags(newMapping, name, value)
+	m.format(newMapping, name, value, field.Tag)
+}
+
+func (m *Mapping) printSlice(mapping map[string]any, key string, v reflect.Value, tag reflect.StructTag) {
 	var d = m.deep
 	m.deep++
 
