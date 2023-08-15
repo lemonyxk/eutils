@@ -12,7 +12,7 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/lemonyxk/eutils"
+	"github.com/lemonyxk/eutils/mapping"
 	"os"
 )
 
@@ -44,7 +44,7 @@ func main() {
 
 	_ = post
 
-	var ets = eutils.NewMapping()
+	var ets = mapping.New()
 	ets.DefaultKeyword(false)
 	ets.IgnoreNil(false)
 	ets.WithTag(false)

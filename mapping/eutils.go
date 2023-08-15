@@ -8,7 +8,7 @@
 * @create: 2023-05-21 18:16
 **/
 
-package eutils
+package mapping
 
 import (
 	"reflect"
@@ -62,7 +62,7 @@ func (m *Mapping) IgnoreAbove(i int) {
 	m.ignoreAbove = i
 }
 
-func NewMapping() *Mapping {
+func New() *Mapping {
 	return &Mapping{
 		visited:        make(map[uintptr]bool),
 		defaultKeyword: true,

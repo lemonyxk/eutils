@@ -1,0 +1,1304 @@
+{
+  "SELECT `id`, `name` FROM `student` WHERE (`name` LIKE '%aaa!_bbb!!ccc%') ORDER BY `updateTime` DESC LIMIT 10": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "match": {
+              "name": "aaa!_bbb!!ccc"
+            }
+          }
+        ]
+      }
+    },
+    "size": 10,
+    "sort": [
+      {
+        "updateTime": "desc"
+      }
+    ]
+  },
+  "select * from `order`.abcd where `by` = 1": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "by": 1
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select * from `test-db` where create_time between '2015-01-01 00:00:00' and '2015-01-01 00:00:00'": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "range": {
+                  "create_time": {
+                    "gte": "2015-01-01 00:00:00",
+                    "lte": "2015-01-01 00:00:00"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select * from `test-db` where create_time between '2015-01-01T00:00:00+0800' and '2017-01-01T00:00:00+0800' and process_id = 0 and status >= 1 and content = '三个男人' and phone = '15810324322'": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "range": {
+                  "create_time": {
+                    "gte": "2015-01-01T00:00:00+0800",
+                    "lte": "2017-01-01T00:00:00+0800"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "process_id": 0
+                }
+              }
+            }
+          },
+          {
+            "bool": {
+              "filter": {
+                "range": {
+                  "status": {
+                    "gte": 1
+                  }
+                }
+              }
+            }
+          },
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "content": "三个男人"
+                }
+              }
+            }
+          },
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "phone": "15810324322"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select * from `test-db` where id > 1 or process_id = 0": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "should": [
+          {
+            "bool": {
+              "filter": {
+                "range": {
+                  "id": {
+                    "gt": 1
+                  }
+                }
+              }
+            }
+          },
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "process_id": 0
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select * from `test-db` where process_id > 1 and status = 1": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "range": {
+                  "process_id": {
+                    "gt": 1
+                  }
+                }
+              }
+            }
+          },
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "status": 1
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select * from a order by `order`.abc": {
+    "from": 0,
+    "size": 1,
+    "sort": [
+      {
+        "order.abc": "asc"
+      }
+    ]
+  },
+  "select * from a where (((id = 1 and name = -1) and addr = china) or b in ('a',    'b',1) or a is not null and c between 10 and 900)": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "should": [
+          {
+            "bool": {
+              "filter": [
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "id": 1
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "name": -1
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "addr": "china"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "terms": {
+              "b": ["a", "b", 1]
+            }
+          },
+          {
+            "bool": {
+              "filter": [
+                {
+                  "bool": {
+                    "filter": {
+                      "exists": {
+                        "field": "a"
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": {
+                      "range": {
+                        "c": {
+                          "gte": 10,
+                          "lte": 900
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select * from a where id = 1 and ((name = 'a' or name = 'b') and (age = 1 or age = 2)) order by id desc limit 10": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "id": 1
+                }
+              }
+            }
+          },
+          {
+            "bool": {
+              "should": [
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "name": "a"
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "name": "b"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "bool": {
+              "should": [
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "age": 1
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "age": 2
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "size": 10,
+    "sort": [
+      {
+        "id": "desc"
+      }
+    ]
+  },
+  "select * from a where id = 1 and ((name = 'a' or name = 'b') or (age = 1 or age = 2)) order by id desc limit 10": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "id": 1
+                }
+              }
+            }
+          },
+          {
+            "bool": {
+              "should": [
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "name": "a"
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "name": "b"
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "age": 1
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "age": 2
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "size": 10,
+    "sort": [
+      {
+        "id": "desc"
+      }
+    ]
+  },
+  "select * from a where id = 1 and ((name = 'a' or name = 'b') or c=2 and (age = 1 or age = 2)) order by id desc limit 10, 20": {
+    "from": 10,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "id": 1
+                }
+              }
+            }
+          },
+          {
+            "bool": {
+              "should": [
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "name": "a"
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "name": "b"
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": [
+                      {
+                        "bool": {
+                          "filter": {
+                            "term": {
+                              "c": 2
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "bool": {
+                          "should": [
+                            {
+                              "bool": {
+                                "filter": {
+                                  "term": {
+                                    "age": 1
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "bool": {
+                                "filter": {
+                                  "term": {
+                                    "age": 2
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "size": 20,
+    "sort": [
+      {
+        "id": "desc"
+      }
+    ]
+  },
+  "select * from a where id = 1 and (name = 'a' or name = 'b')": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "id": 1
+                }
+              }
+            }
+          },
+          {
+            "bool": {
+              "should": [
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "name": "a"
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "name": "b"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select * from a where id = 1 and (name = 'a' or name = 'b') and (age = 1 or age = 2)": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "id": 1
+                }
+              }
+            }
+          },
+          {
+            "bool": {
+              "should": [
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "name": "a"
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "name": "b"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "bool": {
+              "should": [
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "age": 1
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "age": 2
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select * from a where id = 1 and (name = 'a' or name = 'b') and (age = 1 or age = 2) order by id desc": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "id": 1
+                }
+              }
+            }
+          },
+          {
+            "bool": {
+              "should": [
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "name": "a"
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "name": "b"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "bool": {
+              "should": [
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "age": 1
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "age": 2
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "size": 1,
+    "sort": [
+      {
+        "id": "desc"
+      }
+    ]
+  },
+  "select * from a where id = 1 and (name = 'a' or name = 'b') and (age = 1 or age = 2) order by id desc limit 10": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "id": 1
+                }
+              }
+            }
+          },
+          {
+            "bool": {
+              "should": [
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "name": "a"
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "name": "b"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "bool": {
+              "should": [
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "age": 1
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "age": 2
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "size": 10,
+    "sort": [
+      {
+        "id": "desc"
+      }
+    ]
+  },
+  "select * from a where id is not null": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "exists": {
+                  "field": "id"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select * from a where id is null": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "must_not": {
+                "exists": {
+                  "field": "id"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select * from abc limit 10": {
+    "from": 0,
+    "size": 10
+  },
+  "select * from abc limit 10,10": {
+    "from": 10,
+    "size": 10
+  },
+  "select * from user where (id > 1 and d = 1) or (c=1)": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "should": [
+          {
+            "bool": {
+              "filter": [
+                {
+                  "bool": {
+                    "filter": {
+                      "range": {
+                        "id": {
+                          "gt": 1
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "d": 1
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "c": 1
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select * from user where id > 1 and d = 1 or process_id = 0 and x = 2": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "should": [
+          {
+            "bool": {
+              "filter": [
+                {
+                  "bool": {
+                    "filter": {
+                      "range": {
+                        "id": {
+                          "gt": 1
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "d": 1
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "bool": {
+              "filter": [
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "process_id": 0
+                      }
+                    }
+                  }
+                },
+                {
+                  "bool": {
+                    "filter": {
+                      "term": {
+                        "x": 2
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select * from user where id > 1 or (process_id = 0)": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "should": [
+          {
+            "bool": {
+              "filter": {
+                "range": {
+                  "id": {
+                    "gt": 1
+                  }
+                }
+              }
+            }
+          },
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "process_id": 0
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select * from user where id > 1 order by id asc, order_id desc": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "range": {
+                  "id": {
+                    "gt": 1
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1,
+    "sort": [
+      {
+        "id": "asc"
+      },
+      {
+        "order_id": "desc"
+      }
+    ]
+  },
+  "select * from user where id in ('232', '323') and content = 'aaaa'": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "terms": {
+              "id": ["232", "323"]
+            }
+          },
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "content": "aaaa"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select * from user where id in (1,2,3,4)": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "terms": {
+              "id": [1, 2, 3, 4]
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select * from user where id not in (1,2,3)": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "must_not": {
+                "terms": {
+                  "id": [1, 2, 3]
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select * from user where id not like '%aaa%'": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "must_not": {
+                "match": {
+                  "id": "aaa"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select * from users": {
+    "from": 0,
+    "size": 1
+  },
+  "select user_name from `test-db` where process_id != 1": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "must_not": {
+                "term": {
+                  "process_id": 1
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select user_name from `test-db` where process_id = 0 and status= 1 and channel = 4": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "process_id": 0
+                }
+              }
+            }
+          },
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "status": 1
+                }
+              }
+            }
+          },
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "channel": 4
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select user_name from `test-db` where process_id >= '1'": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "range": {
+                  "process_id": {
+                    "gte": "1"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select user_name from user where ((process_id= 1))": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "process_id": 1
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select user_name from user where (process_id = 1 and status=1)": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "process_id": 1
+                }
+              }
+            }
+          },
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "status": 1
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select user_name from user where (process_id= 1)": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "process_id": 1
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select user_name from user where create_time between '2015-01-01 00:00:00' and '2014-02-02 00:00:00'": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "range": {
+                  "create_time": {
+                    "gte": "2015-01-01 00:00:00",
+                    "lte": "2014-02-02 00:00:00"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select user_name from user where process_id < 1": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "range": {
+                  "process_id": {
+                    "lt": 1
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select user_name from user where process_id <= 1": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "range": {
+                  "process_id": {
+                    "lte": 1
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select user_name from user where process_id > 1": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "filter": {
+                "range": {
+                  "process_id": {
+                    "gt": 1
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select x from user where a like '%a%'": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "match": {
+              "a": "a"
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select x from user where a like '%a%' and b = 1": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "match": {
+              "a": "a"
+            }
+          },
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "b": 1
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  }
+}
