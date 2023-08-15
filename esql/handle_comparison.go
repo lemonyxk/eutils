@@ -95,8 +95,12 @@ func handleComparison(result *A, expr *sqlparser.ComparisonExpr) {
 	case sqlparser.InStr: // in
 		var val = FormatMulti(expr.Right)
 		*result = append(*result, M{
-			"terms": M{
-				String(expr.Left): val,
+			"bool": M{
+				"filter": M{
+					"terms": M{
+						String(expr.Left): val,
+					},
+				},
 			},
 		})
 	case sqlparser.NotInStr: // not in
