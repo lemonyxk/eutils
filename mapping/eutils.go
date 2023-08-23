@@ -450,9 +450,17 @@ func (m *Mapping) printSlice(mapping map[string]any, key string, v reflect.Value
 	// but you have to make sure all elements are the same type
 	// otherwise you will get error from elastic
 	if v.Len() > 0 {
-		m.format(mapping, key, v.Index(0), tag)
+		var p = v.Index(0)
+		if p.Kind() == reflect.Ptr { // if is ptr, will be handled in printPtr
+			p = reflect.New(p.Type().Elem()) // new a element
+		}
+		m.format(mapping, key, p, tag)
 	} else {
-		m.format(mapping, key, reflect.New(v.Type().Elem()), tag)
+		var p = reflect.New(v.Type().Elem()) // new a element
+		if p.Kind() == reflect.Ptr {         // if is ptr, will be handled in printPtr
+			p = reflect.New(p.Type().Elem()) // new a ptr element
+		}
+		m.format(mapping, key, p, tag)
 	}
 
 	m.deep = d

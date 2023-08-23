@@ -51,3 +51,9 @@ func TestAll(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkName(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_, _, _ = esql.Convert("select * from a where abc = 1 and id = 1 and ((name = 'a' or name = 'b') or c=2 and (age = 1 or age = 2)) order by id desc limit 10, 20")
+	}
+}
