@@ -119,7 +119,7 @@ func handleComparison(result *A, expr *sqlparser.ComparisonExpr) {
 		var str = fmt.Sprintf("%v", val)
 		val = strings.ReplaceAll(str, "%", "")
 		*result = append(*result, M{
-			"match": M{
+			"match_phrase": M{
 				String(expr.Left): val,
 			},
 		})
@@ -130,7 +130,7 @@ func handleComparison(result *A, expr *sqlparser.ComparisonExpr) {
 		*result = append(*result, M{
 			"bool": M{
 				"must_not": M{
-					"match": M{
+					"match_phrase": M{
 						String(expr.Left): val,
 					},
 				},
