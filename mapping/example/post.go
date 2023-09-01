@@ -10,42 +10,44 @@
 
 package main
 
-import (
-	"encoding/json"
-)
-
 type Media struct {
-	Resource Resource `json:"resource" bson:"resource"`
-	File     File     `json:"file" bson:"file"`
-	Link     Link     `json:"link" bson:"link"`
+	Resource *Resource `json:"resource,omitempty" bson:"resource,omitempty"`
+	File     *File     `json:"file,omitempty" bson:"file,omitempty"`
+	Link     *Link     `json:"link,omitempty" bson:"link,omitempty"`
+}
+
+type MediaWithItem struct {
+	*Media `json:",omitempty" bson:"inline,omitempty"`
+	Price  *Price `json:"price,omitempty" bson:"price,omitempty"`
 }
 
 type Info struct {
 	Duration float64 `json:"duration" bson:"duration"`
 }
 
-type testAnonymous struct {
+type Download struct {
+	*MediaWithItem `json:",omitempty" bson:"inline,omitempty"`
 }
 
 type AudioWithInfo struct {
-	*Media `json:",omitempty" bson:"inline,omitempty"`
-	Info   Info `json:"info" bson:"info"`
+	*MediaWithItem `json:",omitempty" bson:"inline,omitempty"`
+	Info           Info `json:"info" bson:"info"`
 }
 
 type VideoWithInfo struct {
-	*Media   `json:",omitempty" bson:"inline,omitempty"`
-	Info     Info           `json:"info" bson:"info"`
-	Property *VideoProperty `json:"property,omitempty" bson:"property,omitempty"`
+	*MediaWithItem `json:",omitempty" bson:"inline,omitempty"`
+	Info           Info           `json:"info" bson:"info"`
+	Property       *VideoProperty `json:"property,omitempty" bson:"property,omitempty"`
 }
 
 type ImageWithSize struct {
-	*Media `json:",omitempty" bson:"inline,omitempty"`
-	Size   Size `json:"size" bson:"size"`
+	*MediaWithItem `json:",omitempty" bson:"inline,omitempty"`
+	Size           Size `json:"size" bson:"size"`
 }
 
 type Size struct {
-	Width  int `json:"width" bson:"width"`
-	Height int `json:"height" bson:"height"`
+	Width  float64 `json:"width" bson:"width"`
+	Height float64 `json:"height" bson:"height"`
 }
 
 type Link struct {
@@ -63,6 +65,7 @@ type File struct {
 	Name string `json:"name" bson:"name"`
 	Size int64  `json:"size" bson:"size"`
 	Mime string `json:"mime" bson:"mime"`
+	Hash string `json:"hash" bson:"hash"`
 }
 
 type PostTrend struct {
@@ -97,6 +100,21 @@ type VideoProperty struct {
 	MagnetList   []Magnet `json:"magnet_list" bson:"magnet_list"`
 }
 
+type Line struct {
+	Master bool     `json:"master" bson:"master"`
+	IDList []string `json:"id_list" bson:"id_list"`
+}
+
+type Text struct {
+	Content string `json:"content" bson:"content" es:"analyzer:ik_smart"`
+	Hash    string `json:"hash" bson:"hash"`
+	Price   *Price `json:"price,omitempty" bson:"price,omitempty"`
+}
+
+func (a *Text) Empty() bool {
+	return a == nil || a.Content == ""
+}
+
 type Post struct {
 	ID            string          `json:"id" bson:"_id"`
 	EID           int64           `json:"eid" bson:"eid" index:"eid_1,unique"`
@@ -104,14 +122,10 @@ type Post struct {
 	PackageID     int             `json:"package_id" bson:"package_id"`
 	Type          int             `json:"type" bson:"type"`
 	CategoriesID  []string        `json:"categories_id" bson:"categories_id" index:"categories_id_1"`
-	Tags          []string        `json:"tags" bson:"tags" index:"tags_1" es:"analyzer:ik_max_word"`
+	Tags          []string        `json:"tags" bson:"tags" index:"tags_1"`
 	Title         string          `json:"title" bson:"title" index:"title_1" es:"analyzer:ik_max_word"`
 	Desc          string          `json:"desc" bson:"desc" es:"analyzer:ik_smart"`
-	Content       string          `json:"content" bson:"content" es:"analyzer:ik_smart"`
 	Covers        []ImageWithSize `json:"covers" bson:"covers"`
-	Images        []ImageWithSize `json:"images" bson:"images"`
-	Videos        []VideoWithInfo `json:"videos" bson:"videos"`
-	Audios        []AudioWithInfo `json:"audios" bson:"audios"`
 	CreateTime    int64           `json:"create_time" bson:"create_time" index:"create_time_1"`
 	UpdateTime    int64           `json:"update_time" bson:"update_time" index:"update_time_1"`
 	Status        int             `json:"status" bson:"status"`
@@ -120,55 +134,21 @@ type Post struct {
 	Keywords      []string        `json:"keywords" bson:"keywords" es:"analyzer:ik_max_word"`
 	Areas         []string        `json:"areas" bson:"areas"`
 	Sort          int             `json:"sort" bson:"sort"`
-	Permission    *PType          `json:"permission,omitempty" bson:"permission,omitempty"`
 	Trend         *PostTrend      `json:"trend,omitempty" bson:"trend,omitempty"`
-	testAnonymous
-	TestMap  map[string]interface{} `json:"test_map,omitempty" bson:"test_map,omitempty"`
-	TestMap1 map[string]int         `json:"test_map1,omitempty" bson:"test_map1,omitempty"`
-	TestArr  []int                  `json:"test_arr,omitempty" bson:"test_arr,omitempty"`
-	TestArr1 []interface{}          `json:"test_arr1,omitempty" bson:"test_arr1,omitempty"`
-	TestObj  interface{}            `json:"test_obj,omitempty" bson:"test_obj,omitempty"`
+	Relation      *Relation       `json:"relation,omitempty" bson:"relation,omitempty"`
+	Value         `bson:"value"`
 }
 
-func (a *Post) MarshalJSON() ([]byte, error) {
-	type Alias Post
-
-	var alias Alias = Alias(*a)
-
-	if alias.Permission != nil {
-		for i := 0; i < len(alias.Images); i++ {
-			alias.Images[i].Media = nil
-		}
-		for i := 0; i < len(alias.Videos); i++ {
-			alias.Videos[i].Media = nil
-		}
-		for i := 0; i < len(alias.Audios); i++ {
-			alias.Audios[i].Media = nil
-		}
-	}
-
-	return json.Marshal(alias)
+type Value struct {
+	Text      []Text          `json:"text,omitempty" bson:"text,omitempty"`
+	Images    []ImageWithSize `json:"images,omitempty" bson:"images,omitempty"`
+	Videos    []VideoWithInfo `json:"videos,omitempty" bson:"videos,omitempty"`
+	Audios    []AudioWithInfo `json:"audios,omitempty" bson:"audios,omitempty"`
+	Downloads []Download      `json:"downloads,omitempty" bson:"downloads,omitempty"`
+	Price     *Price          `json:"price,omitempty" bson:"price,omitempty"`
 }
 
 type Price struct {
 	AssetsType int     `json:"assets_type" bson:"assets_type"`
 	Amount     float64 `json:"amount" bson:"amount"`
-}
-
-type PType struct {
-	Price *Price `json:"price,omitempty" bson:"price,omitempty"`
-	Group *GType `json:"group,omitempty" bson:"group,omitempty"`
-}
-
-type GType struct {
-	Allow *Allow `json:"allow,omitempty" bson:"allow,omitempty"`
-	Deny  *Deny  `json:"deny,omitempty" bson:"deny,omitempty"`
-}
-
-type Allow struct {
-	IDList []string `json:"id_list" bson:"id_list"`
-}
-
-type Deny struct {
-	IDList []string `json:"id_list" bson:"id_list"`
 }

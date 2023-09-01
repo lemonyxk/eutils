@@ -78,7 +78,11 @@ func New() *Mapping {
 func (m *Mapping) GenerateMapping(t any) M {
 
 	m.mux.Lock()
-	defer m.mux.Unlock()
+	defer func() {
+		clear(m.visited)
+		m.deep = 0
+		m.mux.Unlock()
+	}()
 
 	var rv = reflect.ValueOf(t)
 
@@ -287,9 +291,15 @@ func (m *Mapping) printStruct(mapping map[string]any, key string, v reflect.Valu
 						value = value.Elem()
 					}
 				}
-
 				for j := 0; j < value.NumField(); j++ {
 					m.doField(value.Type().Field(j), value.Field(j), fieldName, key, mapping, newMapping)
+					if newMapping[fieldName] != nil { // if assign to newMapping, delete it
+						var res = newMapping[fieldName].(M)["properties"].(M)
+						for k1, v1 := range res {
+							newMapping[k1] = v1
+						}
+					}
+					delete(newMapping, fieldName)
 				}
 				continue
 			}
@@ -301,8 +311,11 @@ func (m *Mapping) printStruct(mapping map[string]any, key string, v reflect.Valu
 	m.deep = d
 }
 
-func (m *Mapping) doField(field reflect.StructField, value reflect.Value,
-	fieldName string, key string, mapping map[string]any, newMapping M) {
+func (m *Mapping) doField(
+	field reflect.StructField, value reflect.Value,
+	fieldName string, key string,
+	mapping, newMapping M,
+) {
 	var name, parse = m.parseElasticTag(field.Tag)
 
 	if parse == nil && m.withTag {

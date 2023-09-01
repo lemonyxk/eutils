@@ -35,7 +35,7 @@ func (c *Company) Empty() bool {
 
 func main() {
 
-	var post = Item{
+	var post = Account{
 		//TestMap: map[string]interface{}{
 		//	"test": "test",
 		//	"test2": 1,
