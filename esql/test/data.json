@@ -1,11 +1,17 @@
 {
   "SELECT `id`, `name` FROM `student` WHERE (`name` LIKE '%aaa!_bbb!!ccc%') ORDER BY `updateTime` DESC LIMIT 10": {
+    "_source": {
+      "includes": [
+        "id",
+        "name"
+      ]
+    },
     "from": 0,
     "query": {
       "bool": {
         "must": [
           {
-            "match": {
+            "match_phrase": {
               "name": "aaa!_bbb!!ccc"
             }
           }
@@ -231,7 +237,11 @@
             "bool": {
               "filter": {
                 "terms": {
-                  "b": ["a", "b", 1]
+                  "b": [
+                    "a",
+                    "b",
+                    1
+                  ]
                 }
               }
             }
@@ -966,7 +976,10 @@
             "bool": {
               "filter": {
                 "terms": {
-                  "id": ["232", "323"]
+                  "id": [
+                    "232",
+                    "323"
+                  ]
                 }
               }
             }
@@ -994,7 +1007,12 @@
             "bool": {
               "filter": {
                 "terms": {
-                  "id": [1, 2, 3, 4]
+                  "id": [
+                    1,
+                    2,
+                    3,
+                    4
+                  ]
                 }
               }
             }
@@ -1013,7 +1031,11 @@
             "bool": {
               "must_not": {
                 "terms": {
-                  "id": [1, 2, 3]
+                  "id": [
+                    1,
+                    2,
+                    3
+                  ]
                 }
               }
             }
@@ -1031,7 +1053,7 @@
           {
             "bool": {
               "must_not": {
-                "match": {
+                "match_phrase": {
                   "id": "aaa"
                 }
               }
@@ -1047,6 +1069,11 @@
     "size": 1
   },
   "select user_name from `test-db` where process_id != 1": {
+    "_source": {
+      "includes": [
+        "user_name"
+      ]
+    },
     "from": 0,
     "query": {
       "bool": {
@@ -1065,7 +1092,7 @@
     },
     "size": 1
   },
-  "select user_name from `test-db` where process_id = 0 and status= 1 and channel = 4": {
+  "select * from `test-db` where process_id = 0 and status= 1 and channel = 4": {
     "from": 0,
     "query": {
       "bool": {
@@ -1102,7 +1129,7 @@
     },
     "size": 1
   },
-  "select user_name from `test-db` where process_id >= '1'": {
+  "select * from `test-db` where process_id >= '1'": {
     "from": 0,
     "query": {
       "bool": {
@@ -1123,7 +1150,7 @@
     },
     "size": 1
   },
-  "select user_name from user where ((process_id= 1))": {
+  "select * from user where ((process_id= 1))": {
     "from": 0,
     "query": {
       "bool": {
@@ -1142,7 +1169,7 @@
     },
     "size": 1
   },
-  "select user_name from user where (process_id = 1 and status=1)": {
+  "select * from user where (process_id = 1 and status=1)": {
     "from": 0,
     "query": {
       "bool": {
@@ -1170,7 +1197,7 @@
     },
     "size": 1
   },
-  "select user_name from user where (process_id= 1)": {
+  "select * from user where (process_id= 1)": {
     "from": 0,
     "query": {
       "bool": {
@@ -1189,7 +1216,7 @@
     },
     "size": 1
   },
-  "select user_name from user where create_time between '2015-01-01 00:00:00' and '2014-02-02 00:00:00'": {
+  "select * from user where create_time between '2015-01-01 00:00:00' and '2014-02-02 00:00:00'": {
     "from": 0,
     "query": {
       "bool": {
@@ -1211,7 +1238,7 @@
     },
     "size": 1
   },
-  "select user_name from user where process_id < 1": {
+  "select * from user where process_id < 1": {
     "from": 0,
     "query": {
       "bool": {
@@ -1232,7 +1259,7 @@
     },
     "size": 1
   },
-  "select user_name from user where process_id <= 1": {
+  "select * from user where process_id <= 1": {
     "from": 0,
     "query": {
       "bool": {
@@ -1253,7 +1280,7 @@
     },
     "size": 1
   },
-  "select user_name from user where process_id > 1": {
+  "select * from user where process_id > 1": {
     "from": 0,
     "query": {
       "bool": {
@@ -1275,12 +1302,17 @@
     "size": 1
   },
   "select x from user where a like '%a%'": {
+    "_source": {
+      "includes": [
+        "x"
+      ]
+    },
     "from": 0,
     "query": {
       "bool": {
         "must": [
           {
-            "match": {
+            "match_phrase": {
               "a": "a"
             }
           }
@@ -1290,12 +1322,101 @@
     "size": 1
   },
   "select x from user where a like '%a%' and b = 1": {
+    "_source": {
+      "includes": [
+        "x"
+      ]
+    },
     "from": 0,
     "query": {
       "bool": {
         "must": [
           {
-            "match": {
+            "match_phrase": {
+              "a": "a"
+            }
+          },
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "b": 1
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select `a.b`,`c.d` from user where a like '%a%' and b = 1": {
+    "_source": {
+      "includes": [
+        "a.b",
+        "c.d"
+      ]
+    },
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "match_phrase": {
+              "a": "a"
+            }
+          },
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "b": 1
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select (`a.b`),(`c.d`) from user where a like '%a%' and b = 1": {
+    "_source": {
+      "includes": [
+        "a.b",
+        "c.d"
+      ]
+    },
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "match_phrase": {
+              "a": "a"
+            }
+          },
+          {
+            "bool": {
+              "filter": {
+                "term": {
+                  "b": 1
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 1
+  },
+  "select *,(`a.b`) from user where a like '%a%' and b = 1": {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "match_phrase": {
               "a": "a"
             }
           },

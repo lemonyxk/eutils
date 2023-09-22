@@ -35,6 +35,16 @@ func FormatSelectExpr(ss sqlparser.SelectExprs) (M, error) {
 
 	for i := 0; i < len(ss); i++ {
 		var str = sqlparser.String(ss[i].(sqlparser.SQLNode))
+		str = strings.ReplaceAll(str, "`", "")
+		if strings.Contains(str, "*") {
+			if i != 0 {
+				return nil, errors.New("* must be first at select column")
+			}
+			if str != "*" {
+				return nil, errors.New("syntax error at " + str)
+			}
+			return nil, nil
+		}
 		if strings.Contains(str, "(") {
 			if strings.HasPrefix(strings.ToUpper(str), "INCLUDES(") {
 				includes = append(includes, str[10:len(str)-1])
@@ -53,7 +63,6 @@ func FormatSelectExpr(ss sqlparser.SelectExprs) (M, error) {
 			includes = append(includes, str[1:len(str)-1])
 			continue
 		}
-
 		includes = append(includes, str)
 	}
 
