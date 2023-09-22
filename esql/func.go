@@ -11,6 +11,8 @@
 package esql
 
 import (
+	"errors"
+	"fmt"
 	"github.com/xwb1989/sqlparser"
 	"strconv"
 	"strings"
@@ -23,10 +25,49 @@ func Number(expr sqlparser.SQLNode) int {
 
 func String(expr sqlparser.SQLNode) string {
 	var val = sqlparser.String(expr)
-	if val[0] == '`' {
-		return strings.ReplaceAll(val, "`", "")
+	return strings.ReplaceAll(val, "`", "")
+}
+
+func FormatSelectExpr(ss sqlparser.SelectExprs) (M, error) {
+
+	var includes []string
+	var excludes []string
+
+	for i := 0; i < len(ss); i++ {
+		var str = sqlparser.String(ss[i].(sqlparser.SQLNode))
+		if strings.Contains(str, "(") {
+			if strings.HasPrefix(strings.ToUpper(str), "INCLUDES(") {
+				includes = append(includes, str[10:len(str)-1])
+				continue
+			}
+			if strings.HasPrefix(strings.ToUpper(str), "EXCLUDES(") {
+				excludes = append(excludes, str[10:len(str)-1])
+				continue
+			}
+			if str[0] != '(' {
+				return nil, fmt.Errorf("do not support func %s", str)
+			}
+			if strings.Contains(str, ", ") {
+				return nil, errors.New("operand should contain 1 column(s)")
+			}
+			includes = append(includes, str[1:len(str)-1])
+			continue
+		}
+
+		includes = append(includes, str)
 	}
-	return val
+
+	var result = M{"excludes": excludes, "includes": includes}
+
+	if len(excludes) == 0 {
+		delete(result, "excludes")
+	}
+
+	if len(includes) == 0 {
+		delete(result, "includes")
+	}
+
+	return result, nil
 }
 
 func FormatSingle(expr sqlparser.Expr) any {

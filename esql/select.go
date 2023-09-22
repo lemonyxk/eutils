@@ -24,6 +24,15 @@ func handleSelect(stmt *sqlparser.Select) (dsl string, table string, err error) 
 
 	var tableName = String(stmt.From)
 
+	fields, err := FormatSelectExpr(stmt.SelectExprs)
+	if err != nil {
+		return "", "", err
+	}
+
+	if len(fields) != 0 {
+		result["_source"] = fields
+	}
+
 	// handle limit
 	var limit = stmt.Limit
 	if limit != nil {
