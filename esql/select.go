@@ -73,54 +73,53 @@ func handleWhere(result M, expr sqlparser.Expr) {
 	switch expr.(type) {
 	case *sqlparser.AndExpr:
 		var query = &A{}
-		result["bool"] = M{"must": query}
-		handleExpr(query, expr.(*sqlparser.AndExpr).Left, expr)
-		handleExpr(query, expr.(*sqlparser.AndExpr).Right, expr)
+		result["bool"] = M{"filter": query}
+		handleExpr(result, query, expr.(*sqlparser.AndExpr).Left, expr)
+		handleExpr(result, query, expr.(*sqlparser.AndExpr).Right, expr)
 	case *sqlparser.OrExpr:
 		var query = &A{}
 		result["bool"] = M{"should": query}
-		handleExpr(query, expr.(*sqlparser.OrExpr).Left, expr)
-		handleExpr(query, expr.(*sqlparser.OrExpr).Right, expr)
+		handleExpr(result, query, expr.(*sqlparser.OrExpr).Left, expr)
+		handleExpr(result, query, expr.(*sqlparser.OrExpr).Right, expr)
 	case *sqlparser.ParenExpr:
 		handleWhere(result, expr.(*sqlparser.ParenExpr).Expr)
 	default:
 		var query = &A{}
-		result["bool"] = M{"must": query}
-		handleExpr(query, expr, nil)
+		result["bool"] = M{"filter": query}
+		handleExpr(result, query, expr, nil)
 	}
 }
 
-func handleExpr(result *A, expr sqlparser.Expr, parent sqlparser.Expr) {
+func handleExpr(result M, query *A, expr sqlparser.Expr, parent sqlparser.Expr) {
 	switch expr.(type) {
 	case *sqlparser.ComparisonExpr:
-		handleComparison(result, expr.(*sqlparser.ComparisonExpr))
+		handleComparison(query, expr.(*sqlparser.ComparisonExpr))
 	case *sqlparser.IsExpr:
-		handleIs(result, expr.(*sqlparser.IsExpr))
+		handleIs(query, expr.(*sqlparser.IsExpr))
 	case *sqlparser.RangeCond:
-		handleRange(result, expr.(*sqlparser.RangeCond))
+		handleRange(query, expr.(*sqlparser.RangeCond))
 	case *sqlparser.AndExpr:
 		if _, ok := parent.(*sqlparser.AndExpr); ok {
-			handleExpr(result, expr.(*sqlparser.AndExpr).Left, expr)
-			handleExpr(result, expr.(*sqlparser.AndExpr).Right, expr)
+			handleExpr(result, query, expr.(*sqlparser.AndExpr).Left, expr)
+			handleExpr(result, query, expr.(*sqlparser.AndExpr).Right, expr)
 		} else {
 			var res = M{}
-			*result = append(*result, res)
+			*query = append(*query, res)
 			handleAnd(res, expr.(*sqlparser.AndExpr))
 		}
 	case *sqlparser.OrExpr:
 		if _, ok := parent.(*sqlparser.OrExpr); ok {
-			handleExpr(result, expr.(*sqlparser.OrExpr).Left, expr)
-			handleExpr(result, expr.(*sqlparser.OrExpr).Right, expr)
+			handleExpr(result, query, expr.(*sqlparser.OrExpr).Left, expr)
+			handleExpr(result, query, expr.(*sqlparser.OrExpr).Right, expr)
 		} else {
 			var res = M{}
-			*result = append(*result, res)
+			*query = append(*query, res)
 			handleOr(res, expr.(*sqlparser.OrExpr))
 		}
 	case *sqlparser.ParenExpr:
-		handleExpr(result, expr.(*sqlparser.ParenExpr).Expr, parent)
+		handleExpr(result, query, expr.(*sqlparser.ParenExpr).Expr, parent)
 	case *sqlparser.FuncExpr:
-		// TODO
-		panic("not support function")
+		handleFunc(result, expr.(*sqlparser.FuncExpr))
 	default:
 		panic("not support " + String(expr))
 	}
@@ -148,13 +147,24 @@ func handleRange(result *A, cond *sqlparser.RangeCond) {
 func handleAnd(result M, expr *sqlparser.AndExpr) {
 	var query = &A{}
 	result["bool"] = M{"filter": query}
-	handleExpr(query, expr.Left, expr)
-	handleExpr(query, expr.Right, expr)
+	handleExpr(result, query, expr.Left, expr)
+	handleExpr(result, query, expr.Right, expr)
 }
 
 func handleOr(result M, expr *sqlparser.OrExpr) {
 	var query = &A{}
 	result["bool"] = M{"should": query}
-	handleExpr(query, expr.Left, expr)
-	handleExpr(query, expr.Right, expr)
+	handleExpr(result, query, expr.Left, expr)
+	handleExpr(result, query, expr.Right, expr)
+}
+
+func handleFunc(result M, expr *sqlparser.FuncExpr) {
+	var query = &A{}
+	result["bool"].(M)["should"] = query
+
+	stmt, err := sqlparser.Parse("select x from a where " + String(expr.Exprs[0]))
+	if err != nil {
+		panic(err)
+	}
+	handleExpr(result, query, stmt.(*sqlparser.Select).Where.Expr, expr)
 }

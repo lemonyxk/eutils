@@ -9,7 +9,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "match_phrase": {
               "name": "aaa!_bbb!!ccc"
@@ -29,7 +29,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -48,7 +48,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -66,11 +66,11 @@
     },
     "size": 1
   },
-  "select * from `test-db` where create_time between '2015-01-01T00:00:00+0800' and '2017-01-01T00:00:00+0800' and process_id = 0 and status >= 1 and content = '三个男人' and phone = '15810324322'": {
+  "select * from `test-db` where create_time between '2015-01-01T00:00:00+0800' and '2017-01-01T00:00:00+0800' and process_id = 0 and status >= 1 and content = '3man' and phone = '15810324322'": {
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -107,7 +107,7 @@
             "bool": {
               "filter": {
                 "term": {
-                  "content": "三个男人"
+                  "content": "3man"
                 }
               }
             }
@@ -160,7 +160,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -282,7 +282,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -354,7 +354,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -420,7 +420,7 @@
     "from": 10,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -507,7 +507,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -550,7 +550,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -617,7 +617,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -689,7 +689,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -761,7 +761,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -780,7 +780,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "must_not": {
@@ -942,7 +942,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -971,7 +971,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -1002,7 +1002,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -1026,7 +1026,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "must_not": {
@@ -1049,7 +1049,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "must_not": {
@@ -1077,7 +1077,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "must_not": {
@@ -1096,7 +1096,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -1133,7 +1133,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -1154,7 +1154,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -1173,7 +1173,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -1201,7 +1201,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -1220,7 +1220,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -1242,7 +1242,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -1263,7 +1263,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -1284,7 +1284,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "bool": {
               "filter": {
@@ -1310,7 +1310,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "match_phrase": {
               "a": "a"
@@ -1330,7 +1330,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "match_phrase": {
               "a": "a"
@@ -1360,7 +1360,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "match_phrase": {
               "a": "a"
@@ -1390,7 +1390,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "match_phrase": {
               "a": "a"
@@ -1414,7 +1414,7 @@
     "from": 0,
     "query": {
       "bool": {
-        "must": [
+        "filter": [
           {
             "match_phrase": {
               "a": "a"

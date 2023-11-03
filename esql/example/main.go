@@ -11,14 +11,14 @@
 package main
 
 import (
-	"fmt"
 	"github.com/lemonyxk/eutils/esql"
+	"log"
 )
 
 func main() {
 
-	var sql = "select `a.b`,`c.d` from a where abc = 1 and id = 1 and ((name = 'a' or name = 'b') or c=2 and (age = 1 or age = 2)) order by id desc limit 10, 20"
+	var sql = "select a.b from a where SHOULD(abc = 1 and SHOULD(efg = 2)) and id = 1 and ((name = 'a' or name = 'b') or c=2 and (age = 1 or age = 2)) order by id desc limit 10, 20"
 
-	fmt.Println(esql.Convert(sql))
+	log.Println(esql.Convert(sql))
 
 }

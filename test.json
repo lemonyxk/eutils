@@ -1,0 +1,1 @@
+{"properties":{"action":{"type":"long"},"belong_id":{"ignore_above":256,"type":"keyword"},"counter":{"type":"long"},"create_time":{"type":"long"},"eid":{"type":"long"},"for_id":{"ignore_above":256,"type":"keyword"},"for_time":{"type":"long"},"id":{"ignore_above":256,"type":"keyword"},"type":{"type":"long"},"user_id":{"ignore_above":256,"type":"keyword"}}}
