@@ -12,6 +12,7 @@ package esql
 
 import (
 	"github.com/xwb1989/sqlparser"
+	"strings"
 )
 
 func handleSelect(stmt *sqlparser.Select) (dsl string, table string, err error) {
@@ -140,6 +141,13 @@ func handleOr(result M, expr *sqlparser.OrExpr) {
 }
 
 func handleFunc(result M, expr *sqlparser.FuncExpr) {
+
+	var name = expr.Name.String()
+
+	if strings.ToUpper(name) != "SHOULD" {
+		panic("not support " + name + " function")
+	}
+
 	var query = &A{}
 	result["bool"].(M)["should"] = query
 
