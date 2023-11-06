@@ -93,11 +93,11 @@ func handleWhere(result M, expr sqlparser.Expr) {
 func handleExpr(result M, query *A, expr sqlparser.Expr, parent sqlparser.Expr) {
 	switch expr.(type) {
 	case *sqlparser.ComparisonExpr:
-		handleComparison(query, expr.(*sqlparser.ComparisonExpr))
+		handleComparison(query, expr.(*sqlparser.ComparisonExpr), "filter")
 	case *sqlparser.IsExpr:
-		handleIs(query, expr.(*sqlparser.IsExpr))
+		handleIs(query, expr.(*sqlparser.IsExpr), "filter")
 	case *sqlparser.RangeCond:
-		handleRange(query, expr.(*sqlparser.RangeCond))
+		handleRange(query, expr.(*sqlparser.RangeCond), "filter")
 	case *sqlparser.AndExpr:
 		if _, ok := parent.(*sqlparser.AndExpr); ok {
 			handleExpr(result, query, expr.(*sqlparser.AndExpr).Left, expr)
@@ -125,25 +125,6 @@ func handleExpr(result M, query *A, expr sqlparser.Expr, parent sqlparser.Expr) 
 	}
 }
 
-func handleRange(result *A, cond *sqlparser.RangeCond) {
-	var field = sqlparser.String(cond.Left)
-	var from = FormatSingle(cond.From)
-	var to = FormatSingle(cond.To)
-	var query = M{
-		"bool": M{
-			"filter": M{
-				"range": M{
-					field: M{
-						"gte": from,
-						"lte": to,
-					},
-				},
-			},
-		},
-	}
-	*result = append(*result, query)
-}
-
 func handleAnd(result M, expr *sqlparser.AndExpr) {
 	var query = &A{}
 	result["bool"] = M{"filter": query}
@@ -162,9 +143,18 @@ func handleFunc(result M, expr *sqlparser.FuncExpr) {
 	var query = &A{}
 	result["bool"].(M)["should"] = query
 
-	stmt, err := sqlparser.Parse("select x from a where " + String(expr.Exprs[0]))
-	if err != nil {
-		panic(err)
+	for i := 0; i < len(expr.Exprs); i++ {
+		var expr = expr.Exprs[i].(*sqlparser.AliasedExpr).Expr
+
+		switch expr.(type) {
+		case *sqlparser.ComparisonExpr:
+			handleComparison(query, expr.(*sqlparser.ComparisonExpr), "must")
+		case *sqlparser.IsExpr:
+			handleIs(query, expr.(*sqlparser.IsExpr), "must")
+		case *sqlparser.RangeCond:
+			handleRange(query, expr.(*sqlparser.RangeCond), "must")
+		default:
+			panic("not support " + String(expr))
+		}
 	}
-	handleExpr(result, query, stmt.(*sqlparser.Select).Where.Expr, expr)
 }

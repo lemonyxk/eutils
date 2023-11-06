@@ -18,6 +18,11 @@ import (
 	"strings"
 )
 
+func StringToInt(str string) int {
+	var v, _ = strconv.Atoi(str)
+	return v
+}
+
 func Number(expr sqlparser.SQLNode) int {
 	var v, _ = strconv.Atoi(sqlparser.String(expr))
 	return v

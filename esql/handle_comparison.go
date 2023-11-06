@@ -16,100 +16,115 @@ import (
 	"strings"
 )
 
-func handleComparison(result *A, expr *sqlparser.ComparisonExpr) {
+func handleComparison(result *A, expr *sqlparser.ComparisonExpr, action string) {
+	var val = FormatSingle(expr.Right)
+	var left = String(expr.Left)
+	var v = M{}
+	var arr = strings.Split(left, "#")
+	if len(arr) == 2 {
+		left = arr[0]
+		v["boost"] = StringToInt(arr[1])
+	}
+
 	switch expr.Operator {
 	case sqlparser.EqualStr: // =
-		var val = FormatSingle(expr.Right)
+		v["value"] = val
 		*result = append(*result, M{
 			"bool": M{
-				"filter": M{
-					"term": M{
-						String(expr.Left): val,
+				action: A{
+					M{
+						"term": M{
+							left: v,
+						},
 					},
 				},
 			},
 		})
 	case sqlparser.LessThanStr: // <
-		var val = FormatSingle(expr.Right)
+		v["lt"] = val
 		*result = append(*result, M{
 			"bool": M{
-				"filter": M{
-					"range": M{
-						String(expr.Left): M{
-							"lt": val,
+				action: A{
+					M{
+						"range": M{
+							left: v,
 						},
 					},
 				},
 			},
 		})
 	case sqlparser.LessEqualStr: // <=
-		var val = FormatSingle(expr.Right)
+		v["lte"] = val
 		*result = append(*result, M{
 			"bool": M{
-				"filter": M{
-					"range": M{
-						String(expr.Left): M{
-							"lte": val,
+				action: A{
+					M{
+						"range": M{
+							left: v,
 						},
 					},
 				},
 			},
 		})
 	case sqlparser.GreaterThanStr: // >
-		var val = FormatSingle(expr.Right)
+		v["gt"] = val
 		*result = append(*result, M{
 			"bool": M{
-				"filter": M{
-					"range": M{
-						String(expr.Left): M{
-							"gt": val,
+				action: A{
+					M{
+						"range": M{
+							left: v,
 						},
 					},
 				},
 			},
 		})
 	case sqlparser.GreaterEqualStr: // >=
-		var val = FormatSingle(expr.Right)
+		v["gte"] = val
 		*result = append(*result, M{
 			"bool": M{
-				"filter": M{
-					"range": M{
-						String(expr.Left): M{
-							"gte": val,
+				action: A{
+					M{
+						"range": M{
+							left: v,
 						},
 					},
 				},
 			},
 		})
 	case sqlparser.NotEqualStr: // !=
-		var val = FormatSingle(expr.Right)
+		v["value"] = val
 		*result = append(*result, M{
 			"bool": M{
-				"must_not": M{
-					"term": M{
-						String(expr.Left): val,
+				"must_not": A{
+					M{
+						"term": M{
+							left: v,
+						},
 					},
 				},
 			},
 		})
 	case sqlparser.InStr: // in
 		var val = FormatMulti(expr.Right)
+		v[left] = val
 		*result = append(*result, M{
 			"bool": M{
-				"filter": M{
-					"terms": M{
-						String(expr.Left): val,
+				action: A{
+					M{
+						"terms": v,
 					},
 				},
 			},
 		})
 	case sqlparser.NotInStr: // not in
 		var val = FormatMulti(expr.Right)
+		v[left] = val
 		*result = append(*result, M{
 			"bool": M{
-				"must_not": M{
-					"terms": M{
-						String(expr.Left): val,
+				"must_not": A{
+					M{
+						"terms": v,
 					},
 				},
 			},
@@ -118,42 +133,56 @@ func handleComparison(result *A, expr *sqlparser.ComparisonExpr) {
 		var val = FormatSingle(expr.Right)
 		var str = fmt.Sprintf("%v", val)
 		val = strings.ReplaceAll(str, "%", "")
+		v["query"] = val
 		*result = append(*result, M{
-			"match_phrase": M{
-				String(expr.Left): val,
+			"bool": M{
+				"must": A{
+					M{
+						"match_phrase": M{
+							left: v,
+						},
+					},
+				},
 			},
 		})
 	case sqlparser.NotLikeStr: // not like
 		var val = FormatSingle(expr.Right)
 		var str = fmt.Sprintf("%v", val)
 		val = strings.ReplaceAll(str, "%", "")
+		v["query"] = val
 		*result = append(*result, M{
 			"bool": M{
-				"must_not": M{
-					"match_phrase": M{
-						String(expr.Left): val,
+				"must_not": A{
+					M{
+						"match_phrase": M{
+							left: v,
+						},
 					},
 				},
 			},
 		})
 	case sqlparser.RegexpStr: // regexp
-		var val = FormatSingle(expr.Right)
+		v["value"] = val
 		*result = append(*result, M{
 			"bool": M{
-				"filter": M{
-					"regexp": M{
-						String(expr.Left): val,
+				action: A{
+					M{
+						"regexp": M{
+							left: v,
+						},
 					},
 				},
 			},
 		})
 	case sqlparser.NotRegexpStr: // not regexp
-		var val = FormatSingle(expr.Right)
+		v["value"] = val
 		*result = append(*result, M{
 			"bool": M{
-				"must_not": M{
-					"regexp": M{
-						String(expr.Left): val,
+				"must_not": A{
+					M{
+						"regexp": M{
+							left: v,
+						},
 					},
 				},
 			},

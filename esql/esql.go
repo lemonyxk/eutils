@@ -12,7 +12,12 @@ package esql
 
 import (
 	"github.com/xwb1989/sqlparser"
+	"log"
 )
+
+func init() {
+	log.SetFlags(log.Lshortfile | log.LstdFlags)
+}
 
 func Convert(sql string) (dsl string, table string, err error) {
 	stmt, err := sqlparser.Parse(sql)
