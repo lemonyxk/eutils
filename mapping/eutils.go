@@ -247,6 +247,10 @@ func (m *Mapping) printMap(mapping map[string]any, key string, v reflect.Value, 
 			t["index"] = *parse.Index
 		}
 
+		if newMapping[fieldName] != nil {
+			continue
+		}
+
 		newMapping[fieldName] = t
 
 		m.format(newMapping, fieldName, value, tag)
@@ -282,25 +286,40 @@ func (m *Mapping) printStruct(mapping map[string]any, key string, v reflect.Valu
 
 			// elasticsearch ignore anonymous field
 			if field.Anonymous {
-
 				if value.Kind() == reflect.Ptr {
-					if m.ignoreNil {
-						return
-					} else {
-						value = reflect.New(value.Type().Elem())
-						value = value.Elem()
+					if value.IsNil() {
+						if m.ignoreNil {
+							return
+						} else {
+							value = reflect.New(value.Type().Elem())
+						}
 					}
+
+					value = value.Elem()
 				}
 				for j := 0; j < value.NumField(); j++ {
 					m.doField(value.Type().Field(j), value.Field(j), fieldName, key, mapping, newMapping)
 					if newMapping[fieldName] != nil { // if assign to newMapping, delete it
 						var res = newMapping[fieldName].(M)["properties"].(M)
 						for k1, v1 := range res {
-							newMapping[k1] = v1
+							if newMapping[k1] == nil {
+								newMapping[k1] = v1
+							}
 						}
 					}
 					delete(newMapping, fieldName)
 				}
+
+				if mapping[fieldName] != nil { // if assign to mapping, delete it
+					var res = mapping[fieldName].(M)["properties"].(M)
+					for k1, v1 := range res {
+						if mapping[k1] == nil {
+							mapping[k1] = v1
+						}
+					}
+				}
+				delete(mapping, fieldName)
+
 				continue
 			}
 
@@ -419,13 +438,22 @@ func (m *Mapping) doField(
 				}
 			}
 		}
+	default:
+		// ignore
 	}
 
 	// first struct
 	if key == "" {
 		delete(mapping, key)
+		if mapping[name] != nil {
+			return
+		}
 		mapping[name] = t
 		m.format(mapping, name, value, field.Tag)
+		return
+	}
+
+	if newMapping[fieldName] != nil {
 		return
 	}
 

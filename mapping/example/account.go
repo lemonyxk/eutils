@@ -49,15 +49,59 @@ type Wallet struct {
 }
 
 type Property struct {
-	Member  *Object   `json:"member,omitempty" bson:"member,omitempty"`
-	Group   *Object   `json:"group,omitempty" bson:"group,omitempty"`
-	Extends []*Object `json:"extends,omitempty" bson:"extends,omitempty"`
+	Manager *Manager `json:"manager,omitempty" bson:"manager,omitempty"` // 管理组
+	User    *User    `json:"user,omitempty" bson:"user,omitempty"`       // 用户组
+	Member  *Member  `json:"member,omitempty" bson:"member,omitempty"`   // 会员组
+	Extends *Extend  `json:"extends,omitempty" bson:"extends,omitempty"`
+}
+
+type Code int
+
+type RuleType int
+
+type Values []int
+
+type KVS []string
+
+const (
+	Bool     RuleType = iota + 1 // values [0:false 1:true]
+	Range                        // values [min,max,value]
+	Duration                     // values [duration min,max,value value min,max,value]
+	Enum                         // values [1,2,3,4,5]
+)
+
+type Type struct {
+	Code   Code     `json:"code" bson:"code"`
+	Type   RuleType `json:"type" bson:"type"`
+	Values Values   `json:"values,omitempty" bson:"values,omitempty"`
+	Enum   KVS      `json:"enum,omitempty" bson:"enum,omitempty"`
 }
 
 type Object struct {
-	List []int `json:"list" bson:"list"`
+	*Type `json:",omitempty" bson:"inline,omitempty"`
 	// MAX_INT32 = 2147483647
 	ExpireTime int64 `json:"expire_time,omitempty" bson:"expire_time,omitempty"`
+}
+
+type Objects map[Code]*Object
+
+type Manager struct {
+	Objects    Objects `json:"objects" bson:"objects"`
+	ExpireTime int64   `json:"expire_time,omitempty" bson:"expire_time,omitempty"`
+}
+
+type User struct {
+	Objects    Objects `json:"objects" bson:"objects"`
+	ExpireTime int64   `json:"expire_time,omitempty" bson:"expire_time,omitempty"`
+}
+
+type Member struct {
+	Objects    Objects `json:"objects" bson:"objects"`
+	ExpireTime int64   `json:"expire_time,omitempty" bson:"expire_time,omitempty"`
+}
+
+type Extend struct {
+	Objects `json:",omitempty" bson:"inline,omitempty"`
 }
 
 type Fraction struct {

@@ -40,6 +40,30 @@ func main() {
 		//	"test": "test",
 		//	"test2": 1,
 		//},
+		Item: Item{
+			ID:         "",
+			PackageID:  0,
+			Name:       TestName{},
+			Type:       0,
+			Tags:       nil,
+			Expire:     Expire{},
+			Price:      Price{},
+			Images:     nil,
+			Context:    Context{},
+			CreateTime: 0,
+			UpdateTime: 0,
+			StartTime:  0,
+			EndTime:    0,
+			Sort:       0,
+			Status:     0,
+			Post1: Post1{
+				//Name:  "1",
+				Link: "1",
+				Post2: Post2{
+					Name1: "2",
+				},
+			},
+		},
 	}
 
 	_ = post
@@ -58,4 +82,15 @@ func main() {
 	}
 	defer f.Close()
 	f.Write(bts)
+
+	bts, err = json.Marshal(post)
+	if err != nil {
+		panic(err)
+	}
+	f1, err := os.OpenFile(`test2.json`, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+	defer f1.Close()
+	f1.Write(bts)
 }

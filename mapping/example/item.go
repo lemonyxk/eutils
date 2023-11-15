@@ -18,7 +18,7 @@ type Context struct {
 type Item struct {
 	ID         string          `json:"id" bson:"_id"`
 	PackageID  int             `json:"package_id" bson:"package_id"`
-	Name       string          `json:"name" bson:"name" index:"name_1"`
+	Name       TestName        `json:"name" bson:"name" index:"name_1"`
 	Type       int             `json:"type" bson:"type"`
 	Tags       []string        `json:"tags" bson:"tags" index:"tags_1"`
 	Expire     Expire          `json:"expire" bson:"expire"`
@@ -31,9 +31,14 @@ type Item struct {
 	EndTime    int64           `json:"end_time" bson:"end_time" index:"end_time_1"`
 	Sort       int64           `json:"sort" bson:"sort"`
 	Status     int             `json:"status" bson:"status"`
+	Post1
 }
 
 type Expire struct {
 	Value int `json:"value" bson:"value"`
 	Code  int `json:"code" bson:"code"`
+}
+
+type TestName struct {
+	Name string `json:"name" bson:"name"`
 }
