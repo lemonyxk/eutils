@@ -11,6 +11,7 @@
 package mapping
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"sync"
@@ -184,7 +185,17 @@ func (m *Mapping) printMap(mapping map[string]any, key string, v reflect.Value, 
 	keys := v.MapKeys()
 	for i := 0; i < v.Len(); i++ {
 		value := v.MapIndex(keys[i])
-		var fieldName = keys[i].String()
+		var fieldName string
+		switch keys[i].Kind() {
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+			reflect.Uintptr:
+			fieldName = fmt.Sprintf("%d", keys[i].Interface())
+		case reflect.String:
+			fieldName = fmt.Sprintf("%s", keys[i].Interface())
+		default:
+			continue // json only support string and number
+		}
 
 		var name, parse = m.parseElasticTag(tag)
 
@@ -289,7 +300,7 @@ func (m *Mapping) printStruct(mapping map[string]any, key string, v reflect.Valu
 				if value.Kind() == reflect.Ptr {
 					if value.IsNil() {
 						if m.ignoreNil {
-							return
+							continue
 						} else {
 							value = reflect.New(value.Type().Elem())
 						}
@@ -297,28 +308,41 @@ func (m *Mapping) printStruct(mapping map[string]any, key string, v reflect.Valu
 
 					value = value.Elem()
 				}
-				for j := 0; j < value.NumField(); j++ {
-					m.doField(value.Type().Field(j), value.Field(j), fieldName, key, mapping, newMapping)
-					if newMapping[fieldName] != nil { // if assign to newMapping, delete it
-						var res = newMapping[fieldName].(M)["properties"].(M)
-						for k1, v1 := range res {
-							if newMapping[k1] == nil {
-								newMapping[k1] = v1
-							}
-						}
+
+				if value.Kind() == reflect.Interface {
+					if value.IsNil() {
+						continue // don't know the type of interface
 					}
-					delete(newMapping, fieldName)
+
+					value = value.Elem()
 				}
 
-				if mapping[fieldName] != nil { // if assign to mapping, delete it
-					var res = mapping[fieldName].(M)["properties"].(M)
-					for k1, v1 := range res {
-						if mapping[k1] == nil {
-							mapping[k1] = v1
+				if value.Kind() == reflect.Struct {
+					for j := 0; j < value.NumField(); j++ {
+						m.doField(value.Type().Field(j), value.Field(j), fieldName, key, mapping, newMapping)
+						if newMapping[fieldName] != nil { // if assign to newMapping, delete it
+							var res = newMapping[fieldName].(M)["properties"].(M)
+							for k1, v1 := range res {
+								if newMapping[k1] == nil {
+									newMapping[k1] = v1
+								}
+							}
+							delete(newMapping, fieldName)
 						}
 					}
+
+					if mapping[fieldName] != nil { // tree anonymous
+						var res = mapping[fieldName].(M)["properties"].(M)
+						for k1, v1 := range res {
+							if mapping[k1] == nil {
+								mapping[k1] = v1
+							}
+						}
+						delete(mapping, fieldName)
+					}
+				} else {
+					m.doField(field, value, fieldName, key, mapping, newMapping)
 				}
-				delete(mapping, fieldName)
 
 				continue
 			}
@@ -429,10 +453,11 @@ func (m *Mapping) doField(
 						if field.Type.Kind() == reflect.Map {
 							// you can not know the type of key and value if it is nil
 							// cuz you don't know the name of key
-							delete(mapping, key)
-							return
+							delete(newMapping, key)
 							//value = reflect.MakeMap(value.Type())
-							//value.SetMapIndex(reflect.Zero(field.Type.Key()), reflect.Zero(value.Type().Elem()))
+							//value.SetMapIndex(reflect.New(field.Type.Key()).Elem(), reflect.New(value.Type().Elem()).Elem())
+							//m.format(newMapping, name, value, field.Tag)
+							return
 						}
 					}
 				}
@@ -453,7 +478,7 @@ func (m *Mapping) doField(
 		return
 	}
 
-	if newMapping[fieldName] != nil {
+	if newMapping[name] != nil {
 		return
 	}
 

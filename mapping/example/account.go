@@ -25,6 +25,8 @@ type Account struct {
 	Relation   *Relation `json:"relation,omitempty" bson:"relation,omitempty"`
 	Status     int       `json:"status" bson:"status"`
 	CreateTime int64     `json:"create_time" bson:"create_time" index:"create_time_1"`
+	Objects
+	Code
 }
 
 type Assets struct {
@@ -81,6 +83,7 @@ type Object struct {
 	*Type `json:",omitempty" bson:"inline,omitempty"`
 	// MAX_INT32 = 2147483647
 	ExpireTime int64 `json:"expire_time,omitempty" bson:"expire_time,omitempty"`
+	Post1
 }
 
 type Objects map[Code]*Object
@@ -101,7 +104,7 @@ type Member struct {
 }
 
 type Extend struct {
-	Objects `json:",omitempty" bson:"inline,omitempty"`
+	Objects
 }
 
 type Fraction struct {

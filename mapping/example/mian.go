@@ -13,6 +13,7 @@ package main
 import (
 	"encoding/json"
 	"github.com/lemonyxk/eutils/mapping"
+	"log"
 	"os"
 )
 
@@ -35,32 +36,35 @@ func (c *Company) Empty() bool {
 
 func main() {
 
-	var post = Trend{
+	var post = Account{
 		//TestMap: map[string]interface{}{
 		//	"test": "test",
 		//	"test2": 1,
 		//},
-		Item: Item{
-			ID:         "",
-			PackageID:  0,
-			Name:       TestName{},
-			Type:       0,
-			Tags:       nil,
-			Expire:     Expire{},
-			Price:      Price{},
-			Images:     nil,
-			Context:    Context{},
-			CreateTime: 0,
-			UpdateTime: 0,
-			StartTime:  0,
-			EndTime:    0,
-			Sort:       0,
-			Status:     0,
-			Post1: Post1{
-				//Name:  "1",
-				Link: "1",
-				Post2: Post2{
-					Name1: "2",
+		Property: &Property{
+			Manager: &Manager{
+				Objects: Objects{
+					1: &Object{
+						Type: &Type{
+							Code: 1,
+						},
+					},
+				},
+			},
+			Extends: &Extend{
+				Objects: Objects{
+					1: &Object{
+						Type: &Type{
+							Code: 1,
+						},
+					},
+				},
+			},
+		},
+		Objects: Objects{
+			2: &Object{
+				Type: &Type{
+					Code: 1,
 				},
 			},
 		},
@@ -93,4 +97,12 @@ func main() {
 	}
 	defer f1.Close()
 	f1.Write(bts)
+
+	var a Account
+	err = json.Unmarshal(bts, &a)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Printf("%+v", a)
 }
