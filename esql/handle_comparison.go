@@ -132,13 +132,34 @@ func handleComparison(result *A, expr *sqlparser.ComparisonExpr, action string) 
 	case sqlparser.LikeStr: // like
 		var val = FormatSingle(expr.Right)
 		var str = fmt.Sprintf("%v", val)
+
+		var mode = "match_phrase"
+		var count = strings.Count(str, "%")
+		if count == 0 {
+			mode = "match"
+		} else if count == 1 {
+			if strings.HasPrefix(str, "%") {
+				mode = "match_phrase_prefix"
+			} else if strings.HasSuffix(str, "%") {
+				mode = "match_phrase_prefix"
+			} else {
+				mode = "wildcard"
+			}
+		}
+
 		val = strings.ReplaceAll(str, "%", "")
-		v["query"] = val
+
+		if mode == "wildcard" {
+			v["value"] = val
+		} else {
+			v["query"] = val
+		}
+
 		*result = append(*result, M{
 			"bool": M{
 				"must": A{
 					M{
-						"match_phrase": M{
+						mode: M{
 							left: v,
 						},
 					},
@@ -148,13 +169,34 @@ func handleComparison(result *A, expr *sqlparser.ComparisonExpr, action string) 
 	case sqlparser.NotLikeStr: // not like
 		var val = FormatSingle(expr.Right)
 		var str = fmt.Sprintf("%v", val)
+
+		var mode = "match_phrase"
+		var count = strings.Count(str, "%")
+		if count == 0 {
+			mode = "match"
+		} else if count == 1 {
+			if strings.HasPrefix(str, "%") {
+				mode = "match_phrase_prefix"
+			} else if strings.HasSuffix(str, "%") {
+				mode = "match_phrase_prefix"
+			} else {
+				mode = "wildcard"
+			}
+		}
+
 		val = strings.ReplaceAll(str, "%", "")
-		v["query"] = val
+
+		if mode == "wildcard" {
+			v["value"] = val
+		} else {
+			v["query"] = val
+		}
+
 		*result = append(*result, M{
 			"bool": M{
 				"must_not": A{
 					M{
-						"match_phrase": M{
+						mode: M{
 							left: v,
 						},
 					},
