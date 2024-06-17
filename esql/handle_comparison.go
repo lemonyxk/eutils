@@ -145,6 +145,10 @@ func handleComparison(result *A, expr *sqlparser.ComparisonExpr, action string) 
 			} else {
 				mode = "wildcard"
 			}
+		} else {
+			if !(str[0] == '%' && str[len(str)-1] == '%') {
+				mode = "wildcard"
+			}
 		}
 
 		val = strings.ReplaceAll(str, "%", "")
@@ -180,6 +184,10 @@ func handleComparison(result *A, expr *sqlparser.ComparisonExpr, action string) 
 			} else if strings.HasSuffix(str, "%") {
 				mode = "match_phrase_prefix"
 			} else {
+				mode = "wildcard"
+			}
+		} else {
+			if !(str[0] == '%' && str[len(str)-1] == '%') {
 				mode = "wildcard"
 			}
 		}
