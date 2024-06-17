@@ -130,13 +130,17 @@ func handleComparison(result *A, expr *sqlparser.ComparisonExpr, action string) 
 			},
 		})
 	case sqlparser.LikeStr: // like
+		// match will split the keyword and match each of them in any order
+		// match_phrase will split the keyword and match them in order but must match all of words
+		// match_phrase_prefix will split the keyword and match them in order and support prefix in the last word
+		// match will split the keyword and match each of them in any order and support prefix or suffix in each word
 		var val = FormatSingle(expr.Right)
 		var str = fmt.Sprintf("%v", val)
 
-		var mode = "match_phrase"
+		var mode string
 		var count = strings.Count(str, "%")
 		if count == 0 {
-			mode = "match"
+			mode = "match_phrase"
 		} else if count == 1 {
 			if strings.HasPrefix(str, "%") {
 				mode = "match_phrase_prefix"
@@ -151,7 +155,12 @@ func handleComparison(result *A, expr *sqlparser.ComparisonExpr, action string) 
 			}
 		}
 
+		if strings.Count(str, "*") == 2 && strings.HasPrefix(str, "*") && strings.HasSuffix(str, "*") {
+			mode = "match"
+		}
+
 		val = strings.ReplaceAll(str, "%", "")
+		val = strings.ReplaceAll(str, "*", "")
 
 		if mode == "wildcard" {
 			v["value"] = val
@@ -174,10 +183,10 @@ func handleComparison(result *A, expr *sqlparser.ComparisonExpr, action string) 
 		var val = FormatSingle(expr.Right)
 		var str = fmt.Sprintf("%v", val)
 
-		var mode = "match_phrase"
+		var mode string
 		var count = strings.Count(str, "%")
 		if count == 0 {
-			mode = "match"
+			mode = "match_phrase"
 		} else if count == 1 {
 			if strings.HasPrefix(str, "%") {
 				mode = "match_phrase_prefix"
@@ -192,7 +201,12 @@ func handleComparison(result *A, expr *sqlparser.ComparisonExpr, action string) 
 			}
 		}
 
+		if strings.Count(str, "*") == 2 && strings.HasPrefix(str, "*") && strings.HasSuffix(str, "*") {
+			mode = "match"
+		}
+
 		val = strings.ReplaceAll(str, "%", "")
+		val = strings.ReplaceAll(str, "*", "")
 
 		if mode == "wildcard" {
 			v["value"] = val
