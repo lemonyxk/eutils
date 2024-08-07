@@ -14,9 +14,9 @@
 			"bool": {
 			  "must": [
 				{
-				  "match_phrase": {
+				  "wildcard": {
 					"name": {
-					  "query": "aaa!_bbb!!ccc"
+					  "value": "aaa!_bbb!!ccc"
 					}
 				  }
 				}
@@ -48,9 +48,9 @@
 			"bool": {
 			  "must": [
 				{
-				  "match_phrase": {
+				  "wildcard": {
 					"a": {
-					  "query": "a"
+					  "value": "a"
 					}
 				  }
 				}
@@ -1517,9 +1517,9 @@
 			"bool": {
 			  "must_not": [
 				{
-				  "match_phrase": {
+				  "wildcard": {
 					"id": {
-					  "query": "aaa"
+					  "value": "aaa"
 					}
 				  }
 				}
@@ -1613,9 +1613,9 @@
 			"bool": {
 			  "must": [
 				{
-				  "match_phrase": {
+				  "wildcard": {
 					"a": {
-					  "query": "a"
+					  "value": "a"
 					}
 				  }
 				}
@@ -1655,9 +1655,9 @@
 			"bool": {
 			  "must": [
 				{
-				  "match_phrase": {
+				  "wildcard": {
 					"a": {
-					  "query": "a"
+					  "value": "a"
 					}
 				  }
 				}
@@ -1724,10 +1724,10 @@
 			"bool": {
 			  "must": [
 				{
-				  "match_phrase": {
+				  "wildcard": {
 					"a": {
 					  "boost": 2,
-					  "query": "a"
+					  "value": "a"
 					}
 				  }
 				}
@@ -1753,9 +1753,9 @@
 			"bool": {
 			  "must": [
 				{
-				  "match_phrase": {
+				  "wildcard": {
 					"a": {
-					  "query": "a"
+					  "value": "a"
 					}
 				  }
 				}
@@ -1835,7 +1835,7 @@
 			"bool": {
 			  "must": [
 				{
-				  "match": {
+				  "match_phrase": {
 					"title": {
 					  "query": "111"
 					}
@@ -1858,9 +1858,9 @@
 			"bool": {
 			  "must": [
 				{
-				  "match_phrase": {
+				  "wildcard": {
 					"title": {
-					  "query": "111"
+					  "value": "111"
 					}
 				  }
 				}

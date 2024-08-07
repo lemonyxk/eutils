@@ -150,7 +150,7 @@ func handleComparison(result *A, expr *sqlparser.ComparisonExpr, action string) 
 				mode = "wildcard"
 			}
 		} else {
-			if !(str[0] == '%' && str[len(str)-1] == '%') {
+			if str[0] == '%' && str[len(str)-1] == '%' {
 				mode = "wildcard"
 			}
 		}
@@ -159,8 +159,10 @@ func handleComparison(result *A, expr *sqlparser.ComparisonExpr, action string) 
 			mode = "match"
 		}
 
-		val = strings.ReplaceAll(str, "%", "")
-		val = strings.ReplaceAll(str, "*", "")
+		str = strings.ReplaceAll(str, "%", "")
+		str = strings.ReplaceAll(str, "*", "")
+
+		val = str
 
 		if mode == "wildcard" {
 			v["value"] = val
@@ -196,7 +198,7 @@ func handleComparison(result *A, expr *sqlparser.ComparisonExpr, action string) 
 				mode = "wildcard"
 			}
 		} else {
-			if !(str[0] == '%' && str[len(str)-1] == '%') {
+			if str[0] == '%' && str[len(str)-1] == '%' {
 				mode = "wildcard"
 			}
 		}
@@ -205,8 +207,10 @@ func handleComparison(result *A, expr *sqlparser.ComparisonExpr, action string) 
 			mode = "match"
 		}
 
-		val = strings.ReplaceAll(str, "%", "")
-		val = strings.ReplaceAll(str, "*", "")
+		str = strings.ReplaceAll(str, "%", "")
+		str = strings.ReplaceAll(str, "*", "")
+
+		val = str
 
 		if mode == "wildcard" {
 			v["value"] = val
