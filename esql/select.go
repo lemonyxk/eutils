@@ -53,9 +53,30 @@ func handleSelect(stmt *sqlparser.Select) (dsl string, table string, err error) 
 		if orderBy.Direction == sqlparser.DescScr {
 			val = "desc"
 		}
-		orders = append(orders, M{
-			key: val,
-		})
+		if !strings.HasPrefix(strings.ToUpper(key), "CALC(") {
+			orders = append(orders, M{
+				key: val,
+			})
+		} else {
+			key = strings.ReplaceAll(key[5:len(key)-1], " ", "")
+
+			var fields = doParseCalcField(key)
+
+			//for j := 0; j < len(fields); j++ {
+			//	key = strings.ReplaceAll(key, fields[j], "doc['"+fields[j]+"'].value")
+			//}
+
+			orders = append(orders, M{
+				"_script": M{
+					"type": "number",
+					"script": M{
+						"source": fields,
+					},
+					"order": val,
+				},
+			})
+		}
+
 		result["sort"] = orders
 	}
 
@@ -68,6 +89,43 @@ func handleSelect(stmt *sqlparser.Select) (dsl string, table string, err error) 
 	handleWhere(query, where.Expr)
 
 	return result.String(), tableName, nil
+}
+
+func doParseCalcField(key string) string {
+	// 解析计算字段
+	// 例如：CALC(a+b*c/d * (f-2)) desc
+	// 解析为：a+b*c/d * (f-2)
+	// 提取字段：a b c d f
+
+	var fields string
+
+	var field = ""
+	for i := 0; i < len(key); i++ {
+		fields += string(key[i])
+		if key[i] == '(' || key[i] == ')' || key[i] == '+' || key[i] == '-' || key[i] == '*' || key[i] == '/' {
+			if field != "" {
+				if !IsNumber(field) {
+					//key = strings.ReplaceAll(key, fields[j], "doc['"+fields[j]+"'].value")
+					fields = fields[:len(fields)-len(field)-1]
+					fields += "doc['" + field + "'].value"
+					fields += string(key[i])
+				}
+				field = ""
+			}
+			continue
+		}
+
+		field += string(key[i])
+
+		if i == len(key)-1 {
+			if !IsNumber(field) {
+				fields = fields[:len(fields)-len(field)]
+				fields += "doc['" + field + "'].value"
+			}
+		}
+	}
+
+	return fields
 }
 
 func handleWhere(result M, expr sqlparser.Expr) {

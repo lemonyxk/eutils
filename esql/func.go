@@ -33,6 +33,11 @@ func String(expr sqlparser.SQLNode) string {
 	return strings.ReplaceAll(val, "`", "")
 }
 
+func IsNumber(str string) bool {
+	var _, err = strconv.ParseFloat(str, 64)
+	return err == nil
+}
+
 func FormatSelectExpr(ss sqlparser.SelectExprs) (M, error) {
 
 	var includes []string
