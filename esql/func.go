@@ -46,6 +46,7 @@ func FormatSelectExpr(ss sqlparser.SelectExprs) (M, error) {
 	for i := 0; i < len(ss); i++ {
 		var str = sqlparser.String(ss[i].(sqlparser.SQLNode))
 		str = strings.ReplaceAll(str, "`", "")
+		str = strings.ReplaceAll(str, "'", "")
 		if strings.Contains(str, "*") {
 			if i != 0 {
 				return nil, errors.New("* must be first at select column")
@@ -57,11 +58,11 @@ func FormatSelectExpr(ss sqlparser.SelectExprs) (M, error) {
 		}
 		if strings.Contains(str, "(") {
 			if strings.HasPrefix(strings.ToUpper(str), "INCLUDES(") {
-				includes = append(includes, str[10:len(str)-1])
+				includes = append(includes, strings.Split(str[9:len(str)-1], ", ")...)
 				continue
 			}
 			if strings.HasPrefix(strings.ToUpper(str), "EXCLUDES(") {
-				excludes = append(excludes, str[10:len(str)-1])
+				excludes = append(excludes, strings.Split(str[9:len(str)-1], ", ")...)
 				continue
 			}
 			if str[0] != '(' {
