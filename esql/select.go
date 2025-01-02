@@ -54,7 +54,7 @@ func handleSelect(stmt *sqlparser.Select) (dsl string, table string, err error) 
 			val = "desc"
 		}
 		if strings.HasPrefix(strings.ToUpper(key), "CALC(") {
-			key = strings.ReplaceAll(key[5:len(key)-1], " ", "")
+			key = key[5 : len(key)-1]
 
 			var source = doParseCalcField(key)
 
@@ -68,7 +68,7 @@ func handleSelect(stmt *sqlparser.Select) (dsl string, table string, err error) 
 				},
 			})
 		} else if strings.HasPrefix(strings.ToUpper(key), "SCRIPT(") {
-			key = strings.ReplaceAll(key[7:len(key)-1], " ", "")
+			key = key[7 : len(key)-1]
 
 			orders = append(orders, M{
 				"_script": M{
