@@ -53,27 +53,36 @@ func handleSelect(stmt *sqlparser.Select) (dsl string, table string, err error) 
 		if orderBy.Direction == sqlparser.DescScr {
 			val = "desc"
 		}
-		if !strings.HasPrefix(strings.ToUpper(key), "CALC(") {
-			orders = append(orders, M{
-				key: val,
-			})
-		} else {
+		if strings.HasPrefix(strings.ToUpper(key), "CALC(") {
 			key = strings.ReplaceAll(key[5:len(key)-1], " ", "")
 
-			var fields = doParseCalcField(key)
-
-			//for j := 0; j < len(fields); j++ {
-			//	key = strings.ReplaceAll(key, fields[j], "doc['"+fields[j]+"'].value")
-			//}
+			var source = doParseCalcField(key)
 
 			orders = append(orders, M{
 				"_script": M{
 					"type": "number",
 					"script": M{
-						"source": fields,
+						"source": source,
 					},
 					"order": val,
 				},
+			})
+		} else if strings.HasPrefix(strings.ToUpper(key), "SCRIPT(") {
+			key = strings.ReplaceAll(key[7:len(key)-1], " ", "")
+
+			orders = append(orders, M{
+				"_script": M{
+					"type": "number",
+					"script": M{
+						"source": key,
+					},
+					"order": val,
+				},
+			})
+
+		} else {
+			orders = append(orders, M{
+				key: val,
 			})
 		}
 
