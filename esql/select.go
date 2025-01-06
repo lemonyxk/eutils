@@ -11,8 +11,10 @@
 package esql
 
 import (
+	"fmt"
 	"github.com/xwb1989/sqlparser"
 	"strings"
+	"unicode"
 )
 
 func handleSelect(stmt *sqlparser.Select) (dsl string, table string, err error) {
@@ -106,18 +108,47 @@ func doParseCalcField(key string) string {
 	// 解析为：a+b*c/d * (f-2)
 	// 提取字段：a b c d f
 
-	var fields string
+	//def trendWatch = doc['trend.watch'].size() == 0 ? 0 : doc['trend.watch'].value;def initTrendWatch = doc['init_trend.watch'].size() == 0 ? 0 : doc['init_trend.watch'].value;return trendWatch + initTrendWatch;
+
+	var n = 0
+	var getNameFromAZ = func() string {
+		for {
+			var repeat = n / 26
+			if repeat > 0 {
+				var name = string(rune('a' + repeat - 1))
+				name += string(rune('a' + n%26))
+				n++
+				return name
+			}
+			var name = string(rune('a' + n))
+			n++
+			return name
+		}
+	}
+
+	var defArr []string
+	var nameArr []string
+	//var fields string
+	var returnStr = "return "
 
 	var field = ""
 	for i := 0; i < len(key); i++ {
-		fields += string(key[i])
+		if unicode.IsSpace(rune(key[i])) {
+			continue
+		}
+		//fields += string(key[i])
 		if key[i] == '(' || key[i] == ')' || key[i] == '+' || key[i] == '-' || key[i] == '*' || key[i] == '/' {
 			if field != "" {
 				if !IsNumber(field) {
 					//key = strings.ReplaceAll(key, fields[j], "doc['"+fields[j]+"'].value")
-					fields = fields[:len(fields)-len(field)-1]
-					fields += "doc['" + field + "'].value"
-					fields += string(key[i])
+					//fields = fields[:len(fields)-len(field)-1]
+					//fields += "doc['" + field + "'].value"
+					//fields += string(key[i])
+					var name = getNameFromAZ()
+					nameArr = append(nameArr, name)
+					defArr = append(defArr, fmt.Sprintf("def %s = doc['%s'].size() == 0 ? 0 : doc['%s'].value;", name, field, field))
+					returnStr += name
+					returnStr += string(key[i])
 				}
 				field = ""
 			}
@@ -128,13 +159,22 @@ func doParseCalcField(key string) string {
 
 		if i == len(key)-1 {
 			if !IsNumber(field) {
-				fields = fields[:len(fields)-len(field)]
-				fields += "doc['" + field + "'].value"
+				//fields = fields[:len(fields)-len(field)]
+				//fields += "doc['" + field + "'].value"
+				var name = getNameFromAZ()
+				nameArr = append(nameArr, name)
+				defArr = append(defArr, fmt.Sprintf("def %s = doc['%s'].size() == 0 ? 0 : doc['%s'].value;", name, field, field))
+				returnStr += name
 			}
 		}
 	}
 
-	return fields
+	var res = strings.Join(defArr, "")
+	res += returnStr + ";"
+	//log.Println(res)
+
+	//return fields
+	return res
 }
 
 func handleWhere(result M, expr sqlparser.Expr) {
