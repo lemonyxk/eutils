@@ -484,7 +484,9 @@ func (m *Mapping) doField(
 			return
 		}
 		mapping[name] = t
-		m.format(mapping, name, value, field.Tag)
+		if tp != "flattened" && tp != "date" {
+			m.format(mapping, name, value, field.Tag)
+		}
 		return
 	}
 
@@ -495,7 +497,9 @@ func (m *Mapping) doField(
 	newMapping[name] = t
 
 	// printTags(newMapping, name, value)
-	m.format(newMapping, name, value, field.Tag)
+	if tp != "flattened" && tp != "date" {
+		m.format(newMapping, name, value, field.Tag)
+	}
 }
 
 func (m *Mapping) printSlice(mapping map[string]any, key string, v reflect.Value, tag reflect.StructTag) {

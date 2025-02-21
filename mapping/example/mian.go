@@ -130,7 +130,7 @@ type Runtime struct {
 	Method   string       `json:"method" bson:"method"`
 	Path     string       `json:"path" bson:"path"`
 	IP       string       `json:"ip" bson:"ip"`
-	Time     *NumericDate `json:"time" bson:"time"`
+	Time     *NumericDate `json:"time" bson:"time" es:"type:date"`
 	Params   any          `json:"params,omitempty" bson:"params,omitempty" es:"type:flattened"`
 	Response any          `json:"response,omitempty" bson:"response,omitempty" es:"type:flattened"`
 }
