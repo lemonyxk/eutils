@@ -199,6 +199,10 @@ func (m *Mapping) printMap(mapping map[string]any, key string, v reflect.Value, 
 
 		var name, parse = m.parseElasticTag(tag)
 
+		if name == "" {
+			name = fieldName
+		}
+
 		if parse == nil && m.withTag {
 			continue
 		}
@@ -209,10 +213,6 @@ func (m *Mapping) printMap(mapping map[string]any, key string, v reflect.Value, 
 
 		if parse.Ignore {
 			continue
-		}
-
-		if name == "" {
-			name = fieldName
 		}
 
 		var defaultType = m.defaultType(value)
@@ -321,21 +321,27 @@ func (m *Mapping) printStruct(mapping map[string]any, key string, v reflect.Valu
 					for j := 0; j < value.NumField(); j++ {
 						m.doField(value.Type().Field(j), value.Field(j), fieldName, key, mapping, newMapping)
 						if newMapping[fieldName] != nil { // if assign to newMapping, delete it
-							var res = newMapping[fieldName].(M)["properties"].(M)
-							for k1, v1 := range res {
-								if newMapping[k1] == nil {
-									newMapping[k1] = v1
+							var res, ok = newMapping[fieldName].(M)["properties"].(M)
+							if ok {
+								for k1, v1 := range res {
+									if newMapping[k1] == nil {
+										newMapping[k1] = v1
+									}
 								}
+							} else {
+								delete(mapping, key)
 							}
 							delete(newMapping, fieldName)
 						}
 					}
 
 					if mapping[fieldName] != nil { // tree anonymous
-						var res = mapping[fieldName].(M)["properties"].(M)
-						for k1, v1 := range res {
-							if mapping[k1] == nil {
-								mapping[k1] = v1
+						var res, ok = mapping[fieldName].(M)["properties"].(M)
+						if ok {
+							for k1, v1 := range res {
+								if mapping[k1] == nil {
+									mapping[k1] = v1
+								}
 							}
 						}
 						delete(mapping, fieldName)
@@ -361,6 +367,10 @@ func (m *Mapping) doField(
 ) {
 	var name, parse = m.parseElasticTag(field.Tag)
 
+	if name == "" {
+		name = fieldName
+	}
+
 	if parse == nil && m.withTag {
 		return
 	}
@@ -371,10 +381,6 @@ func (m *Mapping) doField(
 
 	if parse.Ignore {
 		return
-	}
-
-	if name == "" {
-		name = fieldName
 	}
 
 	var defaultType = m.defaultType(value)
@@ -441,7 +447,11 @@ func (m *Mapping) doField(
 				} else {
 					if field.Type.Kind() == reflect.Interface {
 						// you can not know the type of interface if it is nil
-						return
+						if parse.Type != "" {
+							value = reflect.ValueOf("") // just let it be string to run the next step
+						} else {
+							return
+						}
 					} else {
 
 						if field.Type.Kind() == reflect.Slice {

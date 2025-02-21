@@ -13,8 +13,7 @@ package main
 import (
 	"encoding/json"
 	"github.com/lemonyxk/eutils/mapping"
-	"log"
-	"os"
+	"time"
 )
 
 type Empty interface {
@@ -36,73 +35,102 @@ func (c *Company) Empty() bool {
 
 func main() {
 
-	var post = Account{
-		//TestMap: map[string]interface{}{
-		//	"test": "test",
-		//	"test2": 1,
-		//},
-		Property: &Property{
-			Manager: &Manager{
-				Objects: Objects{
-					1: &Object{
-						Type: &Type{
-							Code: 1,
-						},
-					},
-				},
-			},
-			Extends: &Extend{
-				Objects: Objects{
-					1: &Object{
-						Type: &Type{
-							Code: 1,
-						},
-					},
-				},
-			},
-		},
-		Objects: Objects{
-			2: &Object{
-				Type: &Type{
-					Code: 1,
-				},
-			},
-		},
-	}
-
-	_ = post
-
+	//var post = Account{
+	//	//TestMap: map[string]interface{}{
+	//	//	"test": "test",
+	//	//	"test2": 1,
+	//	//},
+	//	Property: &Property{
+	//		Manager: &Manager{
+	//			Objects: Objects{
+	//				1: &Object{
+	//					Type: &Type{
+	//						Code: 1,
+	//					},
+	//				},
+	//			},
+	//		},
+	//		Extends: &Extend{
+	//			Objects: Objects{
+	//				1: &Object{
+	//					Type: &Type{
+	//						Code: 1,
+	//					},
+	//				},
+	//			},
+	//		},
+	//	},
+	//	Objects: Objects{
+	//		2: &Object{
+	//			Type: &Type{
+	//				Code: 1,
+	//			},
+	//		},
+	//	},
+	//}
+	//
+	//_ = post
+	//
 	var ets = mapping.New()
 	ets.DefaultKeyword(false)
 	ets.IgnoreNil(false)
 	ets.WithTag(false)
 	ets.TextAsKeyword(true)
+	//
+	//var mapping = ets.GenerateMapping(post)
+	//bts, _ := json.Marshal(mapping)
+	//f, err := os.OpenFile(`test.json`, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//defer f.Close()
+	//f.Write(bts)
+	//
+	//bts, err = json.Marshal(post)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//f1, err := os.OpenFile(`test2.json`, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//defer f1.Close()
+	//f1.Write(bts)
+	//
+	//var a Account
+	//err = json.Unmarshal(bts, &a)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+	//log.Printf("%+v", a)
 
-	var mapping = ets.GenerateMapping(post)
+	var runtime = Runtime{}
+
+	mapping := ets.GenerateMapping(runtime)
+
 	bts, _ := json.Marshal(mapping)
-	f, err := os.OpenFile(`test.json`, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-	f.Write(bts)
 
-	bts, err = json.Marshal(post)
-	if err != nil {
-		panic(err)
-	}
-	f1, err := os.OpenFile(`test2.json`, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-	if err != nil {
-		panic(err)
-	}
-	defer f1.Close()
-	f1.Write(bts)
+	println(string(bts))
 
-	var a Account
-	err = json.Unmarshal(bts, &a)
-	if err != nil {
-		panic(err)
-	}
+	//f, err = os.OpenFile(`test3.json`, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+	//defer f.Close()
+	//f.Write(bts)
+}
 
-	log.Printf("%+v", a)
+type NumericDate struct {
+	time.Time
+}
+
+type Runtime struct {
+	Method   string       `json:"method" bson:"method"`
+	Path     string       `json:"path" bson:"path"`
+	IP       string       `json:"ip" bson:"ip"`
+	Time     *NumericDate `json:"time" bson:"time"`
+	Params   any          `json:"params,omitempty" bson:"params,omitempty" es:"type:flattened"`
+	Response any          `json:"response,omitempty" bson:"response,omitempty" es:"type:flattened"`
 }

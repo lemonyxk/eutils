@@ -1,0 +1,1 @@
+{"properties":{"ip":{"ignore_above":256,"type":"keyword"},"method":{"ignore_above":256,"type":"keyword"},"params":{"type":"flattened"},"path":{"ignore_above":256,"type":"keyword"},"response":{"type":"flattened"},"time":{"properties":{}}}}
