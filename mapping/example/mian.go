@@ -22,7 +22,7 @@ type Empty interface {
 
 type Company struct {
 	ID            int    `json:"id" es:"index:true"`
-	Alias         string `json:"alias" es:"type:keyword,index:true"`
+	Alias         string `json:"alias" es:"type:keyword,index:true,analyzer:ik_max_word"`
 	Name          string `json:"name" es:"type:text"`
 	Description   string `json:"description" es:"type:text"`
 	EmployeeCount int    `json:"employee_count" es:"index:false"`
@@ -128,7 +128,7 @@ type NumericDate struct {
 
 type Runtime struct {
 	Method   string       `json:"method" bson:"method"`
-	Path     string       `json:"path" bson:"path"`
+	Path     string       `json:"path" bson:"path" es:"type:text,keyword:true,analyzer:ik_max_word"`
 	IP       string       `json:"ip" bson:"ip"`
 	Time     *NumericDate `json:"time" bson:"time" es:"type:date"`
 	Params   any          `json:"params,omitempty" bson:"params,omitempty" es:"type:flattened"`

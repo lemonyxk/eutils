@@ -235,7 +235,7 @@ func (m *Mapping) printMap(mapping map[string]any, key string, v reflect.Value, 
 			t["analyzer"] = parse.Analyzer
 		}
 
-		if parse.Keyword && tp == "text" && !m.textAsKeyword {
+		if parse.Keyword && tp == "text" {
 			t["fields"] = M{
 				"keyword": M{
 					"type":         "keyword",
@@ -403,7 +403,7 @@ func (m *Mapping) doField(
 		t["analyzer"] = parse.Analyzer
 	}
 
-	if parse.Keyword && tp == "text" && !m.textAsKeyword {
+	if parse.Keyword && tp == "text" {
 		t["fields"] = M{
 			"keyword": M{
 				"type":         "keyword",
