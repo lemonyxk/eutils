@@ -11,8 +11,8 @@
 package main
 
 import (
-	"encoding/json"
 	"github.com/lemonyxk/eutils/mapping"
+	"github.com/lemonyxk/kitty/json"
 	"time"
 )
 
