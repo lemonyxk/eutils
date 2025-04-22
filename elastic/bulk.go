@@ -58,15 +58,13 @@ type BulkModels []*BulkModel
 
 func (d BulkModels) String() string {
 	var builder = strings.Builder{}
-	for index, data := range d {
+	for _, data := range d {
 		for op, meta := range data.Meta {
 			builder.WriteString(fmt.Sprintf(`{"%s":{"_index":"%s","_id":"%s"}}`, op, meta.Index, meta.ID))
+			builder.WriteString("\n")
 		}
 		if len(data.Document) > 0 {
-			builder.WriteString("\n")
 			builder.WriteString(data.Document)
-		}
-		if index != len(d)-1 {
 			builder.WriteString("\n")
 		}
 	}

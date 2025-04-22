@@ -429,11 +429,7 @@ func (m *Model[T]) Queries(queries ...Query) ([]*Result[T], error) {
 			return results, errors.New("table name error")
 		}
 
-		queryStr += `{}` + "\n" + dsl
-
-		if i != len(queries)-1 {
-			queryStr += "\n"
-		}
+		queryStr += `{}` + "\n" + dsl + "\n"
 	}
 
 	var now = time.Now()
@@ -734,11 +730,7 @@ func (m *Model[T]) Searches(searches []kitty.M) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		dsl += `{}` + "\n" + string(bts)
-
-		if i != len(searches)-1 {
-			dsl += "\n"
-		}
+		dsl += `{}` + "\n" + string(bts) + "\n"
 	}
 
 	var now = time.Now()
@@ -785,9 +777,7 @@ func (m *Model[T]) Indexes(insert ...T) (*types.MultiIndexResponse, error) {
 			return nil, err
 		}
 		resBuf.Write(b)
-		if i != len(insert)-1 {
-			resBuf.WriteByte('\n')
-		}
+		resBuf.WriteByte('\n')
 	}
 
 	var req = esapi.BulkRequest{
@@ -1156,9 +1146,6 @@ func (m *Model[T]) Bulk(models ...BulkModels) (*types.MultiIndexResponse, error)
 	var buf = bytes.NewBuffer(nil)
 	for i := 0; i < len(models); i++ {
 		buf.WriteString(models[i].String())
-		if i != len(models)-1 {
-			buf.WriteByte('\n')
-		}
 	}
 
 	var req = esapi.BulkRequest{
