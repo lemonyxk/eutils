@@ -82,13 +82,27 @@ func handleSelect(stmt *sqlparser.Select) (dsl string, table string, err error) 
 				},
 			})
 
+		} else if strings.HasPrefix(strings.ToUpper(key), "SEARCH_AFTER(") {
+			key = key[13 : len(key)-1]
+			var arr = strings.Split(key, ", ")
+			var arr2 = make([]any, 0)
+			for j := 0; j < len(arr); j++ {
+				if arr[j][0] == '\'' {
+					arr2 = append(arr2, arr[j][1:len(arr[j])-1])
+				} else {
+					arr2 = append(arr2, StringToFloat(arr[j]))
+				}
+			}
+			result["search_after"] = arr2
 		} else {
 			orders = append(orders, M{
 				key: val,
 			})
 		}
 
-		result["sort"] = orders
+		if len(orders) > 0 {
+			result["sort"] = orders
+		}
 	}
 
 	// handle where

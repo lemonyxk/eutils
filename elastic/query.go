@@ -30,6 +30,8 @@ type Query struct {
 	Includes []string `json:"includes,omitempty"`
 	Excludes []string `json:"excludes,omitempty"`
 	Indexes  []string `json:"indexes,omitempty"`
+
+	SearchAfter []any `json:"search_after,omitempty"`
 }
 
 type Skip struct {

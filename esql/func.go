@@ -33,6 +33,11 @@ func String(expr sqlparser.SQLNode) string {
 	return strings.ReplaceAll(val, "`", "")
 }
 
+func StringToFloat(str string) float64 {
+	var v, _ = strconv.ParseFloat(str, 64)
+	return v
+}
+
 func IsNumber(str string) bool {
 	var _, err = strconv.ParseFloat(str, 64)
 	return err == nil

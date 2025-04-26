@@ -1,7 +1,6 @@
 package elastic
 
 import (
-	"github.com/elastic/go-elasticsearch/v9"
 	"github.com/lemonyxk/eutils/mapping"
 	"github.com/lemonyxk/kitty/kitty"
 )
@@ -40,7 +39,7 @@ func MakeDynamicTemplate[T any]() kitty.M {
 }
 
 type Model[T Elastic] struct {
-	client *elasticsearch.Client
+	client *Client
 	config EsConfig
 	t      T
 }

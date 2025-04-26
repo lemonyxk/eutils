@@ -11,10 +11,10 @@
 package main
 
 import (
-	"github.com/elastic/go-elasticsearch/v9"
 	"github.com/lemonyxk/eutils/elastic"
 	"github.com/lemonyxk/kitty/json"
 	"github.com/lemonyxk/kitty/kitty"
+	"log"
 	"time"
 )
 
@@ -82,22 +82,44 @@ func main() {
 
 	//var sql = "select a.b from a where SHOULD(`abc#2` BETWEEN 1 and 2, efg = 2) and `id#10` = 1 and `title#3` is not null and ((name = 'a' or name = 'b') and SHOULD(x = 1 , xx = 2) or c=2 and (age = 1 or age = 2)) and title like `1%1` order by id desc limit 10, 20"
 
-	var t = &Trend{
-		ID:         "1",
-		PackageID:  1,
-		Counter:    1,
-		Value:      1,
-		Remark:     "1",
-		ForTime:    1,
-		CreateTime: 1,
+	//var t = &Trend{
+	//	ID:         "1",
+	//	PackageID:  1,
+	//	Counter:    1,
+	//	Value:      1,
+	//	Remark:     "1",
+	//	ForTime:    1,
+	//	CreateTime: 1,
+	//}
+	//
+	//var m = elastic.NewModel[*Trend](&elasticsearch.Client{})
+	//println(
+	//	elastic.NewBulk(m).Create(t).Upsert(t, elastic.Params{
+	//		Set: kitty.M{"name": "set"},
+	//		Inc: kitty.M{"counter": 1},
+	//	}).String(),
+	//)
+
+	sql, err := elastic.MakeSQL(elastic.QueryTable{Name: "social.post", Query: elastic.Query{
+		Skip: elastic.Skip{
+			Page:  1,
+			Limit: 10,
+		},
+		And: []elastic.Q{
+			{Field: "categories_id", Op: "in", Value: []any{"171"}},
+		},
+		SearchAfter: []any{1, "a1"},
+	}})
+	if err != nil {
+		panic(err)
 	}
 
-	var m = elastic.NewModel[*Trend](&elasticsearch.Client{})
-	println(
-		elastic.NewBulk(m).Create(t).Upsert(t, elastic.Params{
-			Set: kitty.M{"name": "set"},
-			Inc: kitty.M{"counter": 1},
-		}).String(),
-	)
+	log.Println(sql)
 
+	dsl, _, err := elastic.ConvertSQLToDSL(sql)
+	if err != nil {
+		panic(err)
+	}
+
+	println("sql:", dsl)
 }

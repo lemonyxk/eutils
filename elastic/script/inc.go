@@ -6,15 +6,6 @@
 
 package script
 
-import (
-	"bytes"
-	"context"
-	"github.com/elastic/go-elasticsearch/v9"
-	"github.com/elastic/go-elasticsearch/v9/esapi"
-	"github.com/lemonyxk/kitty/json"
-	"github.com/lemonyxk/kitty/kitty"
-)
-
 /*
 
 POST test_1/_update/1
@@ -53,41 +44,6 @@ POST test_1/_update/1
 }
 
 */
-
-func CreateUpdateScript(client *elasticsearch.Client) {
-
-	var script = kitty.M{
-		"script": kitty.M{
-			"source": UpdateScript,
-			"lang":   "painless",
-		},
-	}
-
-	var bts, err = json.Marshal(script)
-	if err != nil {
-		panic(err)
-	}
-
-	var req = esapi.PutScriptRequest{
-		ScriptID: "update",
-		Body:     bytes.NewReader(bts),
-	}
-
-	res, err := req.Do(context.Background(), client)
-	if err != nil {
-		panic(err)
-	}
-
-	defer func() { _ = res.Body.Close() }()
-
-	if res.IsError() {
-		panic(res.String())
-	}
-
-	defer func() { _ = res.Body.Close() }()
-
-	println(res.String())
-}
 
 var UpdateScript = `
 // 递归函数，构建路径

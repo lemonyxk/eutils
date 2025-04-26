@@ -515,6 +515,33 @@ func MakeSQL(queryRequest QueryTable) (SQL, error) {
 		sub += fmt.Sprintf(" `%s` %s", sort.Field, strings.ToUpper(sort.Order))
 	}
 
+	if len(queryRequest.SearchAfter) > 0 {
+		if len(queryRequest.Sort) == 0 {
+			sub += " ORDER BY SEARCH_AFTER("
+		} else {
+			sub += ", SEARCH_AFTER("
+		}
+		for i := 0; i < len(queryRequest.SearchAfter); i++ {
+			var v = reflect.ValueOf(queryRequest.SearchAfter[i])
+			var n = v.Interface()
+			if reflect.TypeOf(n).Kind() == reflect.String {
+				n = fmt.Sprintf("'%v'", n)
+			}
+			if reflect.TypeOf(n).Kind() == reflect.Float64 {
+				// is integer
+				if n.(float64) == float64(int(n.(float64))) {
+					n = int(n.(float64))
+				}
+			}
+			if i == 0 {
+				sub += fmt.Sprintf("%v", n)
+			} else {
+				sub += fmt.Sprintf(",%v", n)
+			}
+		}
+		sub += ")"
+	}
+
 	sub = sub + fmt.Sprintf(" LIMIT %d,%d", (queryRequest.Page-1)*queryRequest.Limit, queryRequest.Limit)
 
 	if queryRequest.SQL != "" {
