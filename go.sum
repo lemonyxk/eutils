@@ -25,8 +25,8 @@ github.com/klauspost/cpuid/v2 v2.0.9/go.mod h1:FInQzS24/EEf25PyTYn52gqo7WaD8xa02
 github.com/knz/go-libedit v1.10.1/go.mod h1:MZTVkCWyz0oBc7JOWP3wNAzd002ZbM/5hgShxwh4x8M=
 github.com/lemonyxk/caller v0.0.0-20230423070323-e226a04be497 h1:Bb7PsEFG28sebksFw8Vu4p4yXgMocCK/rvdSMQtUQwc=
 github.com/lemonyxk/caller v0.0.0-20230423070323-e226a04be497/go.mod h1:6TuWfAU2LFD6jtjJsFC2dNyvJiDtlhI5oK/pfOa13SQ=
-github.com/lemonyxk/kitty v0.0.0-20250421025831-43021a6dfa3d h1:ADc2HHJFg7uHyvfrEEaMLnEmpXiKnqkERD0YxrHWT8M=
-github.com/lemonyxk/kitty v0.0.0-20250421025831-43021a6dfa3d/go.mod h1:8D+gpbVlquF9FgnbCQvxAJ4z7if5SKbIpQG74oWRBHE=
+github.com/lemonyxk/kitty v0.0.0-20250506111804-95fed1a52663 h1:IPRwJWFXIxr8QXQef2PwnJxuUG4q+rw9H7zyHGbSBu0=
+github.com/lemonyxk/kitty v0.0.0-20250506111804-95fed1a52663/go.mod h1:8D+gpbVlquF9FgnbCQvxAJ4z7if5SKbIpQG74oWRBHE=
 github.com/lemonyxk/utils v0.0.0-20241211130741-fdca16b130ad h1:tMBFSypCxYiQvaAM+Z9aq7naaboBx0tox3lVp03+XUE=
 github.com/lemonyxk/utils v0.0.0-20241211130741-fdca16b130ad/go.mod h1:ll0zPT5tI20W7EqUYTyrRNRtFkuApZ8dFBId6R/EVSE=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

@@ -4,7 +4,7 @@ go 1.24
 
 require (
 	github.com/elastic/go-elasticsearch/v9 v9.0.0
-	github.com/lemonyxk/kitty v0.0.0-20250421025831-43021a6dfa3d
+	github.com/lemonyxk/kitty v0.0.0-20250506111804-95fed1a52663
 	github.com/lemonyxk/utils v0.0.0-20241211130741-fdca16b130ad
 	github.com/xwb1989/sqlparser v0.0.0-20180606152119-120387863bf2
 )
