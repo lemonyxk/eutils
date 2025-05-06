@@ -26,18 +26,18 @@ POST /_bulk
 package elastic
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/lemonyxk/kitty/json"
-	"strings"
 )
 
 type Operation string
 
 const (
-	Create Operation = "create"
-	Update Operation = "update"
-	Index  Operation = "index"
-	Delete Operation = "delete"
+	C Operation = "create"
+	U Operation = "update"
+	I Operation = "index"
+	D Operation = "delete"
 )
 
 func NewBulk[T Elastic](model *Model[T]) *Bulk[T] {
@@ -57,7 +57,11 @@ type BulkModel struct {
 type BulkModels []*BulkModel
 
 func (d BulkModels) String() string {
-	var builder = strings.Builder{}
+	return d.Buffer().String()
+}
+
+func (d BulkModels) Buffer() *bytes.Buffer {
+	var builder = &bytes.Buffer{}
 	for _, data := range d {
 		for op, meta := range data.Meta {
 			builder.WriteString(fmt.Sprintf(`{"%s":{"_index":"%s","_id":"%s"}}`, op, meta.Index, meta.ID))
@@ -68,7 +72,7 @@ func (d BulkModels) String() string {
 			builder.WriteString("\n")
 		}
 	}
-	return builder.String()
+	return builder
 }
 
 type Bulk[T Elastic] struct {
@@ -92,7 +96,7 @@ func (d *Bulk[T]) Create(doc Elastic) *Bulk[T] {
 	d.list = append(d.list, &BulkModel{
 		Document: string(bts),
 		Meta: map[Operation]Meta{
-			Create: {
+			C: {
 				Index: d.model.IndexName(doc.ElasticID()),
 				ID:    doc.ElasticID().String(),
 			},
@@ -109,7 +113,7 @@ func (d *Bulk[T]) Update(doc Elastic) *Bulk[T] {
 	d.list = append(d.list, &BulkModel{
 		Document: `{"doc":` + string(bts) + `}`,
 		Meta: map[Operation]Meta{
-			Update: {
+			U: {
 				Index: d.model.IndexName(doc.ElasticID()),
 				ID:    doc.ElasticID().String(),
 			},
@@ -126,7 +130,7 @@ func (d *Bulk[T]) Index(doc Elastic) *Bulk[T] {
 	d.list = append(d.list, &BulkModel{
 		Document: string(bts),
 		Meta: map[Operation]Meta{
-			Index: {
+			I: {
 				Index: d.model.IndexName(doc.ElasticID()),
 				ID:    doc.ElasticID().String(),
 			},
@@ -138,7 +142,7 @@ func (d *Bulk[T]) Index(doc Elastic) *Bulk[T] {
 func (d *Bulk[T]) Delete(id Identity) *Bulk[T] {
 	d.list = append(d.list, &BulkModel{
 		Meta: map[Operation]Meta{
-			Delete: {
+			D: {
 				Index: d.model.IndexName(id),
 				ID:    id.String(),
 			},
@@ -166,7 +170,7 @@ func (d *Bulk[T]) Upsert(doc Elastic, params Params) *Bulk[T] {
 	d.list = append(d.list, &BulkModel{
 		Document: fmt.Sprintf(`{"script":%s,"upsert":%s}`, string(scriptBts), string(bts)),
 		Meta: map[Operation]Meta{
-			Update: {
+			U: {
 				Index: d.model.IndexName(doc.ElasticID()),
 				ID:    doc.ElasticID().String(),
 			},
@@ -189,7 +193,7 @@ func (d *Bulk[T]) Modify(id Identity, params Params) *Bulk[T] {
 	d.list = append(d.list, &BulkModel{
 		Document: fmt.Sprintf(`{"script":%s}`, string(scriptBts)),
 		Meta: map[Operation]Meta{
-			Update: {
+			U: {
 				Index: d.model.IndexName(id),
 				ID:    id.String(),
 			},

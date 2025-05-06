@@ -1122,38 +1122,6 @@ func (m *Model[T]) Modify(query Query, params Params) (*types.UpdateByQueryRespo
 	return &esResponse, nil
 }
 
-func (m *Model[T]) Bulk(models ...BulkModels) (*types.MultiIndexResponse, error) {
-
-	var buf = bytes.NewBuffer(nil)
-	for i := 0; i < len(models); i++ {
-		buf.WriteString(models[i].String())
-	}
-
-	var req = esapi.BulkRequest{
-		Body:    buf,
-		Timeout: time.Second * 30,
-	}
-
-	res, err := req.Do(context.Background(), m.client)
-	if err != nil {
-		return nil, err
-	}
-
-	defer func() { _ = res.Body.Close() }()
-
-	if res.IsError() {
-		return nil, errors.New(res.String())
-	}
-
-	var multiIndexResponse types.MultiIndexResponse
-	err = json.NewDecoder(res.Body).Decode(&multiIndexResponse)
-	if err != nil {
-		return nil, err
-	}
-
-	return &multiIndexResponse, nil
-}
-
 // Delete deletes a document from the index.
 func (m *Model[T]) Delete(id Identity) (*types.UpdateResponse, error) {
 

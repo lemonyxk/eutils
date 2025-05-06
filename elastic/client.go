@@ -14,6 +14,7 @@ import (
 	"github.com/elastic/go-elasticsearch/v9"
 	"github.com/elastic/go-elasticsearch/v9/esapi"
 	script2 "github.com/lemonyxk/eutils/elastic/script"
+	"github.com/lemonyxk/eutils/elastic/types"
 	"github.com/lemonyxk/kitty/json"
 	"github.com/lemonyxk/kitty/kitty"
 	"strings"
@@ -40,6 +41,33 @@ func NewClient(cfg elasticsearch.Config) (*Client, error) {
 
 type Client struct {
 	*elasticsearch.Client
+}
+
+func (c *Client) Bulk(models ...*BulkModel) (*types.MultiIndexResponse, error) {
+
+	var req = esapi.BulkRequest{
+		Body:    BulkModels(models).Buffer(),
+		Timeout: time.Second * 30,
+	}
+
+	res, err := req.Do(context.Background(), c)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() { _ = res.Body.Close() }()
+
+	if res.IsError() {
+		return nil, errors.New(res.String())
+	}
+
+	var multiIndexResponse types.MultiIndexResponse
+	err = json.NewDecoder(res.Body).Decode(&multiIndexResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return &multiIndexResponse, nil
 }
 
 func (c *Client) CreateUpdateScript() {
