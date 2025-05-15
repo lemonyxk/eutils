@@ -401,6 +401,8 @@ func (m *Model[T]) Queries(queries ...Query) ([]*Result[T], error) {
 
 	var results []*Result[T]
 
+	var indexes []string
+
 	var queryStr string
 	for i := 0; i < len(queries); i++ {
 		var sql SQL
@@ -435,6 +437,13 @@ func (m *Model[T]) Queries(queries ...Query) ([]*Result[T], error) {
 		}
 
 		queryStr += `{}` + "\n" + dsl + "\n"
+
+		for j := 0; j < len(queries[i].Indexes); j++ {
+			indexes = append(indexes, table+"-"+queries[i].Indexes[j])
+		}
+		if len(indexes) == 0 {
+			indexes = []string{table + "*"}
+		}
 	}
 
 	var now = time.Now()
@@ -442,8 +451,10 @@ func (m *Model[T]) Queries(queries ...Query) ([]*Result[T], error) {
 		fmt.Println("search:", queryStr, time.Since(now))
 	}()
 
+	indexes = slice.Compare(indexes).Unique()
+
 	var req = esapi.MsearchRequest{
-		Index: []string{m.config.Prefix + "*"},
+		Index: indexes,
 		Body:  strings.NewReader(queryStr),
 	}
 
@@ -545,8 +556,16 @@ func (m *Model[T]) Count(query Query) (int, error) {
 		fmt.Println("search:", dsl, time.Since(now))
 	}()
 
+	var indexes []string
+	for i := 0; i < len(query.Indexes); i++ {
+		indexes = append(indexes, table+"-"+query.Indexes[i])
+	}
+	if len(indexes) == 0 {
+		indexes = []string{table + "*"}
+	}
+
 	var req = esapi.SearchRequest{
-		Index:          []string{table},
+		Index:          indexes,
 		Body:           strings.NewReader(dsl),
 		TrackTotalHits: true,
 	}
@@ -1094,9 +1113,17 @@ func (m *Model[T]) Modify(query Query, params Params) (*types.UpdateByQueryRespo
 		fmt.Println("search:", uq, time.Since(now))
 	}()
 
+	var indexes []string
+	for i := 0; i < len(query.Indexes); i++ {
+		indexes = append(indexes, table+"-"+query.Indexes[i])
+	}
+	if len(indexes) == 0 {
+		indexes = []string{table + "*"}
+	}
+
 	var waitForCompletion = true
 	var req = esapi.UpdateByQueryRequest{
-		Index:             []string{table},
+		Index:             indexes,
 		Body:              strings.NewReader(uq),
 		Conflicts:         "proceed",
 		WaitForCompletion: &waitForCompletion,
@@ -1204,9 +1231,17 @@ func (m *Model[T]) Remove(query Query) (*types.DeleteByQueryResponse, error) {
 		fmt.Println("search:", uq, time.Since(now))
 	}()
 
+	var indexes []string
+	for i := 0; i < len(query.Indexes); i++ {
+		indexes = append(indexes, table+"-"+query.Indexes[i])
+	}
+	if len(indexes) == 0 {
+		indexes = []string{table + "*"}
+	}
+
 	var waitForCompletion = true
 	var req = esapi.DeleteByQueryRequest{
-		Index:             []string{table},
+		Index:             indexes,
 		Body:              strings.NewReader(uq),
 		Conflicts:         "proceed",
 		WaitForCompletion: &waitForCompletion,
