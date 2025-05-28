@@ -17,6 +17,8 @@ var DynamicTemplates = []kitty.M{
 	},
 }
 
+var Dynamic = false
+
 func Ets() *mapping.Mapping {
 	var ets = mapping.New()
 	ets.DefaultKeyword(false)
@@ -34,7 +36,7 @@ func MakeMapping[T any]() map[string]any {
 func MakeDynamicTemplate[T any]() kitty.M {
 	var m = MakeMapping[T]()
 	m["dynamic_templates"] = DynamicTemplates
-	m["dynamic"] = false
+	m["dynamic"] = Dynamic
 	return m
 }
 
