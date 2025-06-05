@@ -5,6 +5,8 @@ import (
 	"github.com/lemonyxk/kitty/kitty"
 )
 
+var Dynamic = true
+
 var DynamicTemplates = []kitty.M{
 	{
 		"string_as_keyword": kitty.M{
@@ -31,10 +33,10 @@ func MakeMapping[T any]() map[string]any {
 	return Ets().GenerateMapping(t)
 }
 
-func MakeDynamicTemplate[T any](d bool) kitty.M {
+func MakeDynamicTemplate[T any]() kitty.M {
 	var m = MakeMapping[T]()
 	m["dynamic_templates"] = DynamicTemplates
-	m["dynamic"] = d
+	m["dynamic"] = Dynamic
 	return m
 }
 
