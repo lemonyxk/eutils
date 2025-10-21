@@ -11,9 +11,10 @@
 package main
 
 import (
+	"time"
+
 	"github.com/lemonyxk/eutils/mapping"
 	"github.com/lemonyxk/kitty/json"
-	"time"
 )
 
 type Empty interface {
@@ -31,6 +32,35 @@ type Company struct {
 
 func (c *Company) Empty() bool {
 	return c.URLs == nil
+}
+
+type Record struct {
+	User *UserRecord `json:"user,omitempty" bson:"user,omitempty"`
+}
+
+type UserRecord struct {
+}
+
+type Adorn struct {
+	// 头像
+	Record *Record `json:"record,omitempty" bson:"record,omitempty"`
+}
+
+type UserList []*User
+
+type A struct {
+	Level     int      `json:"level" bson:"level"`
+	UserName  string   `json:"user_name" bson:"user_name" index:"user_name_1" es:"analyzer:ik_max_word,keyword:true"`
+	PrevNames []string `json:"prev_names,omitempty" bson:"prev_names,omitempty"` // 历史用户名
+	PackageID int      `json:"package_id" bson:"package_id"`
+
+	LoginTime int64          `json:"login_time" bson:"login_time" index:"login_time_1"`
+	LoginIP   string         `json:"login_ip" bson:"login_ip"`
+	ReginTime int64          `json:"regin_time" bson:"regin_time" index:"regin_time_1"`
+	ReginIP   string         `json:"regin_ip" bson:"regin_ip"`
+	Domain    string         `json:"domain" bson:"domain"`
+	Map       map[string]int `json:"map,omitempty" bson:"map,omitempty"`
+	Adorn     *Adorn         `json:"adorn,omitempty" bson:"adorn,omitempty"`
 }
 
 func main() {
@@ -105,7 +135,7 @@ func main() {
 	//
 	//log.Printf("%+v", a)
 
-	var runtime = Runtime{}
+	var runtime = A{}
 
 	mapping := ets.GenerateMapping(runtime)
 

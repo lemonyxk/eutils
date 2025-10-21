@@ -271,7 +271,6 @@ func (m *Mapping) printMap(mapping map[string]any, key string, v reflect.Value, 
 }
 
 func (m *Mapping) printStruct(mapping map[string]any, key string, v reflect.Value) {
-
 	var d = m.deep
 	m.deep++
 
@@ -489,7 +488,6 @@ func (m *Mapping) doField(
 		}
 		return
 	}
-
 	if newMapping[name] != nil {
 		return
 	}
@@ -625,6 +623,7 @@ func (m *Mapping) parseElasticTag(tag reflect.StructTag) (string, *parser) {
 }
 
 func (m *Mapping) defaultType(tp reflect.Value) string {
+
 	if tp.Kind() == reflect.Ptr {
 		tp = tp.Elem()
 	}
@@ -650,6 +649,6 @@ func (m *Mapping) defaultType(tp reflect.Value) string {
 			return m.defaultType(reflect.New(tp.Type().Elem()))
 		}
 	default:
-		return "text"
+		return "object"
 	}
 }
