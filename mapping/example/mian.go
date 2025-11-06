@@ -54,13 +54,15 @@ type A struct {
 	PrevNames []string `json:"prev_names,omitempty" bson:"prev_names,omitempty"` // 历史用户名
 	PackageID int      `json:"package_id" bson:"package_id"`
 
+	L [2]float64 `json:"l" bson:"l" es:"type:geo_point"`
+
 	LoginTime int64          `json:"login_time" bson:"login_time" index:"login_time_1"`
 	LoginIP   string         `json:"login_ip" bson:"login_ip"`
 	ReginTime int64          `json:"regin_time" bson:"regin_time" index:"regin_time_1"`
 	ReginIP   string         `json:"regin_ip" bson:"regin_ip"`
 	Domain    string         `json:"domain" bson:"domain"`
 	Map       map[string]int `json:"map,omitempty" bson:"map,omitempty"`
-	Adorn     *Adorn         `json:"adorn,omitempty" bson:"adorn,omitempty"`
+	Adorn     []*Adorn       `json:"adorn,omitempty" bson:"adorn,omitempty" es:"type:nested"`
 }
 
 func main() {

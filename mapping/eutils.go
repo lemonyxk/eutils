@@ -178,9 +178,10 @@ func (m *Mapping) printMap(mapping map[string]any, key string, v reflect.Value, 
 	m.visited[v.Pointer()] = true
 
 	var newMapping = M{}
-	mapping[key] = M{
-		"properties": newMapping,
+	if mapping[key] == nil {
+		mapping[key] = M{}
 	}
+	mapping[key].(M)["properties"] = newMapping
 
 	keys := v.MapKeys()
 	for i := 0; i < v.Len(); i++ {
@@ -282,9 +283,10 @@ func (m *Mapping) printStruct(mapping map[string]any, key string, v reflect.Valu
 	}
 
 	var newMapping = M{}
-	mapping[key] = M{
-		"properties": newMapping,
+	if mapping[key] == nil {
+		mapping[key] = M{}
 	}
+	mapping[key].(M)["properties"] = newMapping
 
 	for i := 0; i < v.NumField(); i++ {
 		var field = v.Type().Field(i)
@@ -483,7 +485,7 @@ func (m *Mapping) doField(
 			return
 		}
 		mapping[name] = t
-		if tp != "flattened" && tp != "date" {
+		if tp != "flattened" && tp != "date" && tp != "geo_point" && tp != "geo_shape" {
 			m.format(mapping, name, value, field.Tag)
 		}
 		return
@@ -495,7 +497,7 @@ func (m *Mapping) doField(
 	newMapping[name] = t
 
 	// printTags(newMapping, name, value)
-	if tp != "flattened" && tp != "date" {
+	if tp != "flattened" && tp != "date" && tp != "geo_point" && tp != "geo_shape" {
 		m.format(newMapping, name, value, field.Tag)
 	}
 }
