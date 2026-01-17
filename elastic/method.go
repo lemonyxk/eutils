@@ -759,7 +759,7 @@ func (m *Model[T]) Searches(searches []kitty.M) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func (m *Model[T]) Aggregate(query kitty.M) *AggregationResponse {
+func (m *Model[T]) Aggregate(query kitty.M) *Response {
 	return m.client.Aggregate(m.config.Prefix + "*").Query(query)
 }
 

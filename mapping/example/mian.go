@@ -65,6 +65,23 @@ type A struct {
 	Adorn     []*Adorn       `json:"adorn,omitempty" bson:"adorn,omitempty" es:"type:nested"`
 }
 
+type ABC int
+
+type NoticeValue map[ABC]any
+
+type Notice struct {
+	ID         string      `json:"id" bson:"_id"`
+	PackageID  int         `json:"package_id" bson:"package_id"`
+	UserID     string      `json:"user_id" bson:"user_id" index:"user_id_1"`
+	ForID      string      `json:"for_id" bson:"for_id" index:"for_id_1"`
+	Type       ABC         `json:"type" bson:"type"`
+	Response   ABC         `json:"response" bson:"response"`
+	Topic      string      `json:"topic,omitempty" bson:"topic,omitempty"`
+	Value      NoticeValue `json:"value,omitempty" bson:"value,omitempty"`
+	Remark     string      `json:"remark" bson:"remark"`
+	CreateTime int64       `json:"create_time" bson:"create_time" index:"create_time_1"`
+}
+
 func main() {
 
 	//var post = Account{
