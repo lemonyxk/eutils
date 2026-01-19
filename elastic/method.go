@@ -5,13 +5,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/elastic/go-elasticsearch/v9/esapi"
 	"github.com/lemonyxk/eutils/elastic/types"
 	"github.com/lemonyxk/kitty/json"
 	"github.com/lemonyxk/kitty/kitty"
 	"github.com/lemonyxk/utils/slice"
-	"strings"
-	"time"
 )
 
 type Result[T Elastic] struct {
@@ -1326,8 +1327,12 @@ func (m *Model[T]) Drop(date ...string) (string, error) {
 		fmt.Println("drop:", indexes, time.Since(now))
 	}()
 
+	var allowNoIndices = true
+	var ignoreUnavailable = true
 	var req = esapi.IndicesDeleteRequest{
-		Index: indexes,
+		Index:             indexes,
+		AllowNoIndices:    &allowNoIndices,
+		IgnoreUnavailable: &ignoreUnavailable,
 	}
 
 	res, err := req.Do(context.Background(), m.client)
