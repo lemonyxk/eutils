@@ -345,8 +345,9 @@ func (m *Model[T]) Query(query Query) (*Result[T], error) {
 	}
 
 	var req = esapi.SearchRequest{
-		Index: indexes,
-		Body:  strings.NewReader(dsl),
+		Index:          indexes,
+		Body:           strings.NewReader(dsl),
+		TrackTotalHits: query.TrackTotalHits,
 	}
 
 	res, err := req.Do(context.Background(), m.client)

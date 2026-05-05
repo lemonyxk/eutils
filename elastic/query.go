@@ -31,7 +31,8 @@ type Query struct {
 	Excludes []string `json:"excludes,omitempty"`
 	Indexes  []string `json:"indexes,omitempty"`
 
-	SearchAfter []any `json:"search_after,omitempty"`
+	SearchAfter    []any `json:"search_after,omitempty"`
+	TrackTotalHits any   `json:"track_total_hits,omitempty"` // true, false or int
 }
 
 type Skip struct {
