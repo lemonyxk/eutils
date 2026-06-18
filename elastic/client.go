@@ -122,6 +122,64 @@ func (c *Client) Search(indexes ...string) *Indexes {
 	return &Indexes{c, indexes, search}
 }
 
+func (c *Client) Modify(indexes ...string) *Modifies {
+	return &Modifies{c, indexes}
+}
+
+type Modifies struct {
+	client  *Client
+	indexes []string
+}
+
+func (m *Modifies) UpdateByQuery(q kitty.M) *MResponse {
+	return &MResponse{m, q}
+}
+
+type MResponse struct {
+	*Modifies
+	q kitty.M
+}
+
+func (m *MResponse) All(result any) error {
+	var dslBts, err = json.Marshal(m.q)
+	if err != nil {
+		return err
+	}
+
+	var dsl = string(dslBts)
+
+	var now = time.Now()
+	defer func() {
+		fmt.Println("update:", dsl, time.Since(now))
+	}()
+
+	var waitForCompletion = true
+	var req = esapi.UpdateByQueryRequest{
+		Index:             m.indexes,
+		Body:              strings.NewReader(dsl),
+		Conflicts:         "proceed",
+		WaitForCompletion: &waitForCompletion,
+	}
+
+	res, err := req.Do(context.Background(), m.client)
+	if err != nil {
+		return err
+	}
+
+	defer func() { _ = res.Body.Close() }()
+
+	if res.IsError() {
+		return errors.New(res.String())
+	}
+
+	err = json.NewDecoder(res.Body).Decode(&result)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 type Indexes struct {
 	client  *Client
 	indexes []string
